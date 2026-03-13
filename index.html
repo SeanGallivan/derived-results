@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DR | Secure Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #002D72; margin: 0; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+.login-card { background: white; padding: 2.5rem; border-radius: 12px; text-align: center; width: 380px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+.login-input { width: 100%; padding: 13px; margin: 1.2rem 0 0.5rem 0; border: 2px solid #eee; border-radius: 6px; text-align: center; font-size: 1.1rem; font-weight: 700; font-family: 'Montserrat'; box-sizing: border-box; }
+.login-input:focus { outline: none; border-color: #002D72; }
+.btn-login { background: #002D72; color: white; padding: 13px; width: 100%; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.95rem; font-family: 'Montserrat'; margin-top: 1rem; }
+.btn-login:hover { background: #003d9e; }
+.public-check { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 1rem 0 0.5rem 0; font-size: 0.78rem; font-weight: 700; color: #555; cursor: pointer; }
+.public-check input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #002D72; }
+.login-links { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.2rem; }
+.login-links a { font-size: 0.75rem; font-weight: 700; color: #002D72; text-decoration: none; opacity: 0.7; }
+.login-links a:hover { opacity: 1; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="login-card">
+    <h1 style="color:#002D72; font-weight:800; margin:0 0 0.5rem 0; font-size: 1.6rem;">DERIVED RESULTS</h1>
+    <p style="font-size: 0.8rem; color: #666; font-weight: 600; margin:0 0 0.5rem 0;">ENTER PRACTICE ACCESS CODE</p>
+    <input type="password" id="passcode" class="login-input" placeholder="••••" onkeydown="if(event.key==='Enter') checkAuth()">
+    <label class="public-check">
+        <input type="checkbox" id="publicPC"> Check if This is a Public Computer
+    </label>
+    <button onclick="checkAuth()" class="btn-login">ENTER PORTAL</button>
+    <p id="errMsg" style="color:#D6001C; font-size:0.75rem; margin-top:12px; font-weight:700; display:none;">ACCESS DENIED</p>
+    <div class="login-links">
+        <a href="#.html">Forgot Username</a>
+        <a href="#.html">Forgot Password</a>
+    </div>
+</div>
+<script>
+function checkAuth() {
+    if(document.getElementById('passcode').value === 'DR2026') {
+        sessionStorage.setItem('isAuth', 'true');
+        window.location.href = 'selector.html';
+    } else {
+        document.getElementById('errMsg').style.display = 'block';
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Derived Results | Select Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-gray); }
+        .selector-container { text-align: center; max-width: 900px; width: 100%; padding: 2rem; }
+        .selector-brand { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--primary-navy); margin-bottom: 0.4rem; }
+        .selector-subtitle { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 2.5rem; }
+        .selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+        .selector-card { background: white; border: 2px solid #e8eaed; border-radius: 12px; padding: 2rem 1.5rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: block; }
+        .selector-card:hover { border-color: var(--primary-navy); box-shadow: 0 4px 20px rgba(0,45,114,0.12); transform: translateY(-2px); }
+        .selector-card .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .selector-card .card-label { font-size: 0.95rem; font-weight: 800; color: var(--primary-navy); margin-bottom: 0.4rem; }
+        .selector-card .card-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); line-height: 1.5; }
+        .selector-card.future { opacity: 0.5; cursor: not-allowed; border-style: dashed; }
+        .selector-card.future:hover { border-color: #e8eaed; box-shadow: none; transform: none; }
+        .selector-card.future .card-label::after { content: ' (Coming Soon)'; font-weight: 600; color: #999; font-size: 0.7rem; }
+        .selector-footer { font-size: 0.75rem; color: #999; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="selector-container">
+        <div class="selector-brand" data-branding="org-name">Derived Results</div>
+        <div class="selector-subtitle">Select Your Portal</div>
+        <div class="selector-grid" id="portalGrid"></div>
+        <div class="selector-footer">Each portal provides a tailored view of the Derived Results network.</div>
+    </div>
+    <script src="./view-config.js"></script>
+    <script src="./branding.js"></script>
+    <script>
+        const ICONS = {
+            msk_physician: '\u{1FA7A}',
+            dr_admin: '\u{1F6E1}',
+            tpa: '\u{1F4BC}',
+            researcher: '\u{1F52C}',
+            specialty: '\u{2B50}'
+        };
+
+        const grid = document.getElementById('portalGrid');
+        const entries = [
+            ...Object.values(VIEW_CONFIG),
+            { key: 'specialty', label: 'Specialty-Focused', description: 'Variation of MSK Physician Practice for other specialties', future: true }
+        ];
+
+        grid.innerHTML = entries.map(v => {
+            if (v.future) {
+                return '<div class="selector-card future">' +
+                    '<div class="card-icon">' + (ICONS[v.key] || '') + '</div>' +
+                    '<div class="card-label">' + v.label + '</div>' +
+                    '<div class="card-desc">' + v.description + '</div>' +
+                '</div>';
+            }
+            return '<a class="selector-card" href="./naming.html?view=' + v.key + '">' +
+                '<div class="card-icon">' + (ICONS[v.key] || '') + '</div>' +
+                '<div class="card-label">' + v.label + '</div>' +
+                '<div class="card-desc">' + v.description + '</div>' +
+            '</a>';
+        }).join('');
+    </script>
+</body>
+</html>

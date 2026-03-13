@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Derived Results | Set Presentation Target</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #002D72; margin: 0; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        .naming-card { background: white; padding: 2.8rem 2.5rem; border-radius: 12px; text-align: center; width: 420px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        .naming-brand { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #002D72; margin-bottom: 0.8rem; }
+        .naming-audience-badge { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #D6001C; background: #fff0f2; border: 1px solid #f8c8ce; border-radius: 20px; padding: 0.3rem 0.9rem; display: inline-block; margin-bottom: 1.8rem; }
+        .naming-prompt { font-size: 0.88rem; font-weight: 700; color: #444; margin: 0 0 0.6rem; }
+        .naming-hint { font-size: 0.72rem; font-weight: 600; color: #999; margin: 0 0 1rem; }
+        .naming-input { width: 100%; padding: 14px; border: 2px solid #e0e4ec; border-radius: 8px; text-align: center; font-size: 1.1rem; font-weight: 700; font-family: 'Montserrat'; box-sizing: border-box; color: #002D72; transition: border-color 0.15s; }
+        .naming-input:focus { outline: none; border-color: #002D72; }
+        .naming-input::placeholder { color: #ccc; font-weight: 600; font-size: 0.95rem; }
+        .btn-start { background: #002D72; color: white; padding: 14px; width: 100%; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.92rem; font-family: 'Montserrat'; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1rem; transition: background 0.15s; }
+        .btn-start:hover { background: #003d9e; }
+        .naming-divider { display: flex; align-items: center; gap: 0.8rem; margin: 1.2rem 0 0.6rem; }
+        .naming-divider hr { flex: 1; border: none; border-top: 1px solid #eee; }
+        .naming-divider span { font-size: 0.65rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.06em; }
+        .naming-skip { font-size: 0.72rem; font-weight: 700; color: #002D72; opacity: 0.45; cursor: pointer; background: none; border: none; font-family: 'Montserrat'; width: 100%; padding: 0.4rem; }
+        .naming-skip:hover { opacity: 1; text-decoration: underline; }
+        .naming-back { display: block; margin-top: 1rem; font-size: 0.7rem; font-weight: 700; color: #bbb; text-decoration: none; }
+        .naming-back:hover { color: #002D72; }
+    </style>
+</head>
+<body>
+    <div class="naming-card">
+        <div class="naming-brand">Derived Results</div>
+        <div class="naming-audience-badge" id="audienceBadge">Loading…</div>
+        <p class="naming-prompt">Who are you presenting to today?</p>
+        <p class="naming-hint">This name will appear in the header throughout the presentation.</p>
+        <input type="text" id="orgInput" class="naming-input"
+               placeholder="e.g., Mountain West Benefits"
+               maxlength="80"
+               onkeydown="if(event.key==='Enter') launch()">
+        <button onclick="launch()" class="btn-start">Start Presentation</button>
+        <div class="naming-divider"><hr><span>or</span><hr></div>
+        <button class="naming-skip" onclick="launch(true)">Skip — use default branding</button>
+        <a href="./selector.html" class="naming-back">← Back to Portal Selection</a>
+    </div>
+    <script src="./view-config.js"></script>
+    <script>
+        var params = new URLSearchParams(window.location.search);
+        var viewKey = params.get('view') || 'msk_physician';
+        var config = VIEW_CONFIG[viewKey];
+
+        document.getElementById('audienceBadge').textContent = config ? config.label + ' Portal' : 'Portal';
+
+        // Pre-fill with any previously saved org name
+        var stored = localStorage.getItem('dr_target_org');
+        if (stored) document.getElementById('orgInput').value = stored;
+
+        document.getElementById('orgInput').focus();
+
+        function launch(skip) {
+            var raw = document.getElementById('orgInput').value.trim();
+            var org = (!skip && raw) ? raw : '';
+            if (org) {
+                localStorage.setItem('dr_target_org', org);
+            } else {
+                localStorage.removeItem('dr_target_org');
+            }
+            window.location.href = './dashboard.html?view=' + encodeURIComponent(viewKey);
+        }
+    </script>
+</body>
+</html>

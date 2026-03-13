@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Derived Results | Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .logo-area { text-decoration: none; }
+        .report-sidebar { padding: 0; }
+        .report-category { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #666; padding: 1.8rem 1.2rem 0.6rem; margin: 0; }
+        .report-category:first-child { padding-top: 1.2rem; }
+        .report-item { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid #f0f0f0; padding: 0.6rem 1.2rem; font-family: 'Montserrat'; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background 0.15s; }
+        .report-item:hover { background: #f4f7f6; color: var(--primary-navy); }
+        .report-item.active { background: var(--primary-navy); color: white; font-weight: 800; }
+        .report-item.overview-item { font-weight: 800; color: var(--primary-navy); border-left: 3px solid var(--primary-navy); }
+        .report-item.overview-item.active { background: var(--primary-navy); color: white; border-left-color: white; }
+        .report-item.adhoc-item { background: #f8f9fb; color: var(--primary-navy); font-weight: 800; border-top: 2px solid #e8eaed; border-bottom: 2px solid #e8eaed; padding: 0.8rem 1.2rem; }
+        .report-item.adhoc-item:hover { background: var(--primary-navy); color: white; }
+        .report-item.adhoc-item.active { background: var(--primary-navy); color: white; }
+
+        /* Infographic styles */
+        .info-hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1.2rem; }
+        .info-hero-card { background: var(--primary-navy); color: white; border-radius: 8px; padding: 1rem 1.2rem; text-align: center; }
+        .info-hero-card .hero-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+        .info-hero-card .hero-value { font-size: 1.8rem; font-weight: 800; margin: 0.3rem 0 0; }
+        .info-hero-card.accent { background: #0a8f2c; }
+        .info-hero-card.warn { background: var(--secondary-red); }
+
+        .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem; }
+        .info-panel { background: white; border: 1px solid #eee; border-radius: 8px; padding: 1rem 1.2rem; }
+        .info-panel h4 { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #999; margin: 0 0 0.6rem; }
+        .info-bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.78rem; font-weight: 600; }
+        .info-bar-label { width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .info-bar-track { flex: 1; height: 14px; background: #f0f0f0; border-radius: 7px; overflow: hidden; }
+        .info-bar-fill { height: 100%; border-radius: 7px; }
+        .info-bar-pct { width: 36px; text-align: right; font-weight: 800; font-size: 0.75rem; }
+        .info-mini-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; }
+        .info-mini-card { text-align: center; padding: 0.6rem; background: #f8f9fb; border-radius: 6px; }
+        .info-mini-card .mini-val { font-size: 1.3rem; font-weight: 800; color: var(--primary-navy); }
+        .info-mini-card .mini-label { font-size: 0.6rem; font-weight: 700; color: #999; text-transform: uppercase; margin-top: 0.2rem; }
+
+        .info-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem; }
+
+        .info-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        .info-table th { text-align: left; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #999; padding: 0.4rem 0.6rem; border-bottom: 2px solid #eee; }
+        .info-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #f5f5f5; font-weight: 600; }
+        .info-table tr:hover { background: #f8f9fb; }
+
+        .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; color: var(--text-muted); }
+        .placeholder-view h2 { color: var(--primary-navy); margin-bottom: 0.5rem; }
+        .placeholder-view p { font-size: 0.9rem; max-width: 500px; text-align: center; line-height: 1.6; }
+        .placeholder-tag { display: inline-block; background: #f0f0f0; color: #999; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 4px; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-brand">
+            <a class="logo-area" href="./selector.html" data-branding="org-name">Derived Results</a>
+            <span class="powered-badge">Powered by <strong>Derived Results</strong></span>
+        </div>
+        <nav id="topNav"></nav>
+        <div class="reconciliation-badge">&#x2713; Verified against <span data-branding="org-name">Derived Results</span> Claims System</div>
+    </header>
+    <div class="wrapper">
+        <aside class="sidebar" style="padding-top:0;">
+            <nav class="report-sidebar" id="reportList"></nav>
+        </aside>
+        <main id="mainContent">
+            <div id="reportHeader" class="detail-header">
+                <div><h2 style="margin:0;" id="reportTitle"></h2><div style="font-size:0.9rem; opacity:0.8; margin-top:4px;" id="reportSub"></div></div>
+                <div class="header-actions"><button class="btn btn-action" onclick="window.print()">Export</button><button class="btn btn-action">Share</button></div>
+            </div>
+            <div id="reportBody" class="view-section" style="background:white; padding-top:1.5rem; flex:1; overflow-y:auto;"></div>
+        </main>
+    </div>
+    <script src="./mock-data.js"></script>
+    <script src="./view-config.js"></script>
+    <script src="./router.js"></script>
+    <script src="./branding.js"></script>
+    <script>
+        let activeReport = '';
+        let REPORTS = [];
+
+        function buildSidebar() {
+            const el = document.getElementById('reportList');
+            const org = localStorage.getItem('dr_target_org') || 'Derived Results';
+            let html = '';
+            let lastCat = '';
+            REPORTS.forEach(r => {
+                if (r.cat !== lastCat && r.cat !== '_top' && r.cat !== '_adhoc') {
+                    html += '<div class="report-category">' + r.cat + '</div>';
+                    lastCat = r.cat;
+                }
+                const cls = r.cat === '_top' ? 'report-item overview-item' : r.id === 'adhoc' ? 'report-item adhoc-item' : 'report-item';
+                const icon = r.id === 'adhoc' ? '+ ' : '';
+                const label = r.name.replace('{org}', org);
+                html += '<button class="' + cls + (r.id === activeReport ? ' active' : '') + '" onclick="selectReport(\'' + r.id + '\')">' + icon + label + '</button>';
+            });
+            el.innerHTML = html;
+        }
+
+        function selectReport(id) {
+            activeReport = id;
+            document.querySelectorAll('.report-item').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector('[onclick="selectReport(\'' + id + '\')"]');
+            if (btn) btn.classList.add('active');
+            const r = REPORTS.find(x => x.id === id);
+            var org = localStorage.getItem('dr_target_org') || 'Derived Results';
+            document.getElementById('reportTitle').textContent = r.name.replace('{org}', org);
+            document.getElementById('reportSub').textContent = r.desc || 'Aggregate performance across all practices and patients';
+            if (r.cat === '_top') renderOverviewDispatch();
+            else if (id === 'adhoc') renderAdHoc();
+            else if (REPORT_RENDERERS[id]) REPORT_RENDERERS[id]();
+            else renderPlaceholder(r);
+            initSortableTables();
+        }
+
+        /* --- Overview Dispatch --- */
+        const OVERVIEW_RENDERERS = {
+            renderMSKOverview: function() { renderMSKOverview(); },
+            renderDRAdminAnalytics: function() { renderDRAdminAnalytics(); },
+            renderTPAAnalytics: function() { renderTPAAnalytics(); },
+            renderResearchAnalytics: function() { renderResearchAnalytics(); }
+        };
+
+        const REPORT_RENDERERS = {
+            tpa_perf1:   function() { renderTPAPerf1(); },
+            tpa_perf2:   function() { renderTPAPerf2(); },
+            tpa_perf3:   function() { renderTPAPerf3(); },
+            tpa_renewal: function() { renderTPA004(); },
+            tpa3:        function() { renderTPA005(); },
+            tpa4:        function() { renderTPA006(); },
+            tpa1:        function() { renderTPA007(); },
+            tpa2:        function() { renderTPA008(); }
+        };
+
+        function renderOverviewDispatch() {
+            const config = ROUTER.getConfig();
+            const fn = OVERVIEW_RENDERERS[config.analytics.overviewRenderer];
+            if (fn) fn();
+            else renderPlaceholder({ name: 'Overview', desc: 'No overview configured for this audience.' });
+        }
+
+        /* --- MSK Physician Overview --- */
+        function renderMSKOverview() {
+            const body = document.getElementById('reportBody');
+            const totalSavings = PRACTICES.reduce((s, p) => s + parseFloat(p.totalSavings.replace(/[$Mk,]/g, '')) * (p.totalSavings.includes('M') ? 1000000 : 1000), 0);
+            const totalProcs = PRACTICES.reduce((s, p) => s + parseInt(p.procsAvoided), 0);
+            const avgCost = Math.round(PRACTICES.reduce((s, p) => s + parseFloat(p.costPerCase.replace(/[$,]/g, '')), 0) / PRACTICES.length);
+            const avgReduction = Math.round(PRACTICES.reduce((s, p) => s + (100 - p.costPct), 0) / PRACTICES.length);
+
+            let improving = 0, declining = 0, stable = 0;
+            PATIENTS.forEach(p => {
+                if (p.response.startsWith('+')) improving++;
+                else if (p.response.startsWith('-')) declining++;
+                else stable++;
+            });
+
+            let compComplete = 0, compPartial = 0, compIncomplete = 0;
+            PATIENTS.forEach(p => {
+                if (p.networkCompliance === 'Complete') compComplete++;
+                else if (p.networkCompliance === 'Partial') compPartial++;
+                else compIncomplete++;
+            });
+
+            const ranked = [...PRACTICES].sort((a, b) => a.costPct - b.costPct);
+            const top5 = ranked.slice(0, 5);
+            const bot5 = ranked.slice(-5).reverse();
+
+            const refPI = Math.round(PRACTICES.reduce((s, p) => s + parseInt(p.refPI), 0) / PRACTICES.length);
+            const refEmp = Math.round(PRACTICES.reduce((s, p) => s + parseInt(p.refEmployer), 0) / PRACTICES.length);
+            const refSelf = Math.round(PRACTICES.reduce((s, p) => s + parseInt(p.refSelfPay), 0) / PRACTICES.length);
+
+            body.innerHTML = `
+                <div class="info-hero">
+                    <div class="info-hero-card accent">
+                        <div class="hero-label">Network Total Savings</div>
+                        <div class="hero-value">$${(totalSavings / 1000000).toFixed(1)}M</div>
+                    </div>
+                    <div class="info-hero-card">
+                        <div class="hero-label">Procedures Avoided</div>
+                        <div class="hero-value">${totalProcs.toLocaleString()}</div>
+                    </div>
+                    <div class="info-hero-card">
+                        <div class="hero-label">Avg Cost / Case</div>
+                        <div class="hero-value">$${avgCost.toLocaleString()}</div>
+                    </div>
+                    <div class="info-hero-card">
+                        <div class="hero-label">Avg Cost Reduction</div>
+                        <div class="hero-value">${avgReduction}%</div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Patient Outcomes Distribution (n=${PATIENTS.length})</h4>
+                        <div class="info-mini-grid">
+                            <div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">${improving}</div><div class="mini-label">Improving</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${stable}</div><div class="mini-label">Stable / Baseline</div></div>
+                            <div class="info-mini-card"><div class="mini-val" style="color:var(--secondary-red);">${declining}</div><div class="mini-label">Declining</div></div>
+                        </div>
+                    </div>
+                    <div class="info-panel">
+                        <h4>Network Compliance</h4>
+                        <div class="info-mini-grid">
+                            <div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">${compComplete}</div><div class="mini-label">Complete</div></div>
+                            <div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">${compPartial}</div><div class="mini-label">Partial</div></div>
+                            <div class="info-mini-card"><div class="mini-val" style="color:var(--secondary-red);">${compIncomplete}</div><div class="mini-label">Incomplete</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Top 5 Practices by Cost Reduction</h4>
+                        ${top5.map(p => `<div class="info-bar-row">
+                            <span class="info-bar-label">${p.name.length > 22 ? p.name.slice(0,22) + '...' : p.name}</span>
+                            <div class="info-bar-track"><div class="info-bar-fill" style="width:${100-p.costPct}%; background:#0a8f2c;"></div></div>
+                            <span class="info-bar-pct" style="color:#0a8f2c;">${100-p.costPct}%</span>
+                        </div>`).join('')}
+                    </div>
+                    <div class="info-panel">
+                        <h4>Bottom 5 Practices by Cost Reduction</h4>
+                        ${bot5.map(p => `<div class="info-bar-row">
+                            <span class="info-bar-label">${p.name.length > 22 ? p.name.slice(0,22) + '...' : p.name}</span>
+                            <div class="info-bar-track"><div class="info-bar-fill" style="width:${100-p.costPct}%; background:var(--secondary-red);"></div></div>
+                            <span class="info-bar-pct" style="color:var(--secondary-red);">${100-p.costPct}%</span>
+                        </div>`).join('')}
+                    </div>
+                </div>
+                <div class="info-row-3">
+                    <div class="info-panel">
+                        <h4>Referral Mix (Avg)</h4>
+                        <div class="info-bar-row"><span class="info-bar-label">PI / Attorney</span><div class="info-bar-track"><div class="info-bar-fill" style="width:${refPI}%; background:var(--primary-navy);"></div></div><span class="info-bar-pct">${refPI}%</span></div>
+                        <div class="info-bar-row"><span class="info-bar-label">Employer</span><div class="info-bar-track"><div class="info-bar-fill" style="width:${refEmp}%; background:#0a8f2c;"></div></div><span class="info-bar-pct">${refEmp}%</span></div>
+                        <div class="info-bar-row"><span class="info-bar-label">Self-Pay</span><div class="info-bar-track"><div class="info-bar-fill" style="width:${refSelf}%; background:#cc8800;"></div></div><span class="info-bar-pct">${refSelf}%</span></div>
+                    </div>
+                    <div class="info-panel">
+                        <h4>Benchmark Comparison</h4>
+                        <div class="info-bar-row"><span class="info-bar-label">Network Avg</span><div class="info-bar-track"><div class="info-bar-fill" style="width:${Math.round(avgCost/494.09)}%; background:#0a8f2c;"></div></div><span class="info-bar-pct">$${avgCost.toLocaleString()}</span></div>
+                        <div class="info-bar-row"><span class="info-bar-label">Standard Care</span><div class="info-bar-track"><div class="info-bar-fill" style="width:100%; background:var(--secondary-red);"></div></div><span class="info-bar-pct">$49,409</span></div>
+                        <div style="text-align:center; margin-top:0.6rem; font-size:0.85rem; font-weight:800; color:#0a8f2c;">Network saves $${(49409-avgCost).toLocaleString()} per case</div>
+                    </div>
+                    <div class="info-panel">
+                        <h4>Key Network Metrics</h4>
+                        <div class="info-mini-grid" style="grid-template-columns:1fr 1fr;">
+                            <div class="info-mini-card"><div class="mini-val">${PRACTICES.length}</div><div class="mini-label">Practices</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${PATIENTS.length}</div><div class="mini-label">Active Patients</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${PRACTICES.reduce((s,p) => s + p.staff.length, 0)}</div><div class="mini-label">Physicians</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${PRACTICES.reduce((s,p) => s + p.staff.reduce((a,st) => a + st.admins.length, 0), 0)}</div><div class="mini-label">Staff Members</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-panel" style="margin-bottom:0.8rem;">
+                    <h4>All Practices — Performance Scorecard</h4>
+                    <table class="info-table">
+                        <thead><tr><th>Practice</th><th>Savings</th><th>Procs Avoided</th><th>Cost/Case</th><th>Reduction</th><th>Collection</th><th>Fee Status</th></tr></thead>
+                        <tbody>
+                            ${[...PRACTICES].sort((a,b) => a.costPct - b.costPct).map(p => `<tr>
+                                <td>${p.name}</td>
+                                <td style="font-weight:800; color:#0a8f2c;">${p.totalSavings}</td>
+                                <td>${p.procsAvoided}</td>
+                                <td>${p.costPerCase}</td>
+                                <td style="font-weight:800;">${100-p.costPct}%</td>
+                                <td>${p.collection}</td>
+                                <td style="color:${p.feeAutonomy === 'Independent' ? '#0a8f2c' : p.feeAutonomy === 'Under Review' ? 'var(--secondary-red)' : '#cc8800'}; font-weight:700;">${p.feeAutonomy}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+
+        /* --- DR Admin Overview --- */
+        function renderDRAdminAnalytics() {
+            const body = document.getElementById('reportBody');
+            const o = DR_ADMIN_OVERVIEW;
+            body.innerHTML = `
+                <div class="info-hero">
+                    <div class="info-hero-card accent"><div class="hero-label">Network Savings</div><div class="hero-value">${o.networkSavings}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Total Practices</div><div class="hero-value">${o.totalPractices}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Active Patients</div><div class="hero-value">${o.activePatients.toLocaleString()}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Compliance Rate</div><div class="hero-value">${o.complianceRate}</div></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Participant Breakdown</h4>
+                        <div class="info-mini-grid">
+                            <div class="info-mini-card"><div class="mini-val">${o.totalPractices}</div><div class="mini-label">MSK Practices</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${o.totalTPAs}</div><div class="mini-label">TPAs</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${o.totalResearchers}</div><div class="mini-label">Researchers</div></div>
+                        </div>
+                    </div>
+                    <div class="info-panel">
+                        <h4>Network Highlights</h4>
+                        <div class="info-mini-grid">
+                            <div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">${o.avgCostReduction}</div><div class="mini-label">Avg Cost Reduction</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${o.pendingOnboarding}</div><div class="mini-label">Pending Onboarding</div></div>
+                            <div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">${o.complianceRate}</div><div class="mini-label">Compliance</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Compliance by Participant</h4>
+                        ${DR_ADMIN_ENTITIES.filter(e => e.compliance !== '—').slice(0, 5).map(e => '<div class="info-bar-row"><span class="info-bar-label">' + (e.name.length > 22 ? e.name.slice(0,22) + '...' : e.name) + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + parseInt(e.compliance) + '%; background:#0a8f2c;"></div></div><span class="info-bar-pct">' + e.compliance + '</span></div>').join('')}
+                    </div>
+                    <div class="info-panel">
+                        <h4>Savings by Participant</h4>
+                        ${DR_ADMIN_ENTITIES.filter(e => e.savings !== '—').slice(0, 5).map(e => '<div class="info-bar-row"><span class="info-bar-label">' + (e.name.length > 22 ? e.name.slice(0,22) + '...' : e.name) + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:60%; background:var(--primary-navy);"></div></div><span class="info-bar-pct" style="width:50px;">' + e.savings + '</span></div>').join('')}
+                    </div>
+                </div>
+                <div class="info-panel" style="margin-bottom:0.8rem;">
+                    <h4>All Participants — Status Overview</h4>
+                    <table class="info-table">
+                        <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Members</th><th>Compliance</th><th>Savings</th></tr></thead>
+                        <tbody>${DR_ADMIN_ENTITIES.map(e => '<tr><td>' + e.name + '</td><td>' + e.type + '</td><td style="color:' + (e.status === 'Active' ? '#0a8f2c' : e.status === 'Action Req' ? 'var(--secondary-red)' : '#cc8800') + '; font-weight:700;">' + e.status + '</td><td>' + e.members + '</td><td>' + e.compliance + '</td><td style="font-weight:800; color:#0a8f2c;">' + e.savings + '</td></tr>').join('')}</tbody>
+                    </table>
+                </div>`;
+        }
+
+        /* --- TPA Overview --- */
+        function renderTPAAnalytics() {
+            const body = document.getElementById('reportBody');
+            const o = TPA_OVERVIEW;
+            const sorted = [...TPA_CLIENTS].sort((a, b) => b.savingsVelocity - a.savingsVelocity);
+            const top5 = sorted.slice(0, 5);
+            const bot5 = sorted.slice(-5).reverse();
+            const maxVelocity = sorted[0].savingsVelocity;
+            body.innerHTML = `
+                <div class="info-hero">
+                    <div class="info-hero-card accent"><div class="hero-label">Network Savings</div><div class="hero-value">${o.networkSavings}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Total Members</div><div class="hero-value">${o.totalMembers.toLocaleString()}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Avg Savings / Member</div><div class="hero-value">${o.avgSavingsPerMember}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Plan Sponsors</div><div class="hero-value">${o.totalClients}</div></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Top Clients by Savings</h4>
+                        ${top5.map(c => '<div class="info-bar-row"><span class="info-bar-label">' + (c.name.length > 22 ? c.name.slice(0,22) + '...' : c.name) + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(c.savingsVelocity / maxVelocity * 100) + '%; background:#0a8f2c;"></div></div><span class="info-bar-pct" style="width:50px;">' + c.savingsVelocityLabel + '</span></div>').join('')}
+                    </div>
+                    <div class="info-panel">
+                        <h4>Bottom Clients by Savings</h4>
+                        ${bot5.map(c => '<div class="info-bar-row"><span class="info-bar-label">' + (c.name.length > 22 ? c.name.slice(0,22) + '...' : c.name) + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(c.savingsVelocity / maxVelocity * 100) + '%; background:var(--secondary-red);"></div></div><span class="info-bar-pct" style="width:50px;">' + c.savingsVelocityLabel + '</span></div>').join('')}
+                    </div>
+                </div>
+                <div class="info-panel" style="margin-bottom:0.8rem;">
+                    <h4>All Plan Sponsors — Scorecard</h4>
+                    <table class="info-table">
+                        <thead><tr><th>Client</th><th>Members</th><th>Plan Type</th><th>Region</th><th>Savings to Date</th><th>Avg Member Savings</th></tr></thead>
+                        <tbody>${TPA_CLIENTS.map(c => '<tr><td>' + c.name + '</td><td>' + c.memberCount.toLocaleString() + '</td><td>' + c.planType + '</td><td>' + c.region + '</td><td style="font-weight:800; color:#0a8f2c;">' + c.savingsToDate + '</td><td style="font-weight:700;">' + c.avgMemberSavings + '</td></tr>').join('')}</tbody>
+                    </table>
+                </div>`;
+        }
+
+        /* --- TPA Performance Reports --- */
+        function initSortableTables() {
+            document.querySelectorAll('#reportBody .info-table').forEach(function(table) {
+                var headers = table.querySelectorAll('thead th');
+                headers.forEach(function(th, colIdx) {
+                    th.setAttribute('data-label', th.textContent.trim());
+                    th.style.cursor = 'pointer';
+                    th.style.userSelect = 'none';
+                    th.title = 'Click to sort';
+                    th.addEventListener('click', function() {
+                        var wasAsc = th.getAttribute('data-sort') === 'asc';
+                        var newDir = wasAsc ? 'desc' : 'asc';
+                        var numDir = newDir === 'asc' ? 1 : -1;
+                        headers.forEach(function(h) {
+                            h.removeAttribute('data-sort');
+                            h.textContent = h.getAttribute('data-label');
+                        });
+                        th.setAttribute('data-sort', newDir);
+                        th.textContent = th.getAttribute('data-label') + (newDir === 'asc' ? ' ↑' : ' ↓');
+                        var tbody = table.querySelector('tbody');
+                        var rows = Array.from(tbody.querySelectorAll('tr'));
+                        rows.sort(function(a, b) {
+                            var aText = a.cells[colIdx] ? a.cells[colIdx].textContent.trim() : '';
+                            var bText = b.cells[colIdx] ? b.cells[colIdx].textContent.trim() : '';
+                            var aNum = parseFloat(aText.replace(/[^0-9.\-]/g, ''));
+                            var bNum = parseFloat(bText.replace(/[^0-9.\-]/g, ''));
+                            if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * numDir;
+                            return aText.localeCompare(bText) * numDir;
+                        });
+                        rows.forEach(function(row) { tbody.appendChild(row); });
+                    });
+                });
+            });
+        }
+
+        function tpaSecLabel(text) {
+            return '<div style="font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#aaa; padding:1rem 0 0.5rem; display:flex; align-items:center; gap:0.8rem;"><span>' + text + '</span><span style="flex:1; height:1px; background:#eee;"></span></div>';
+        }
+
+        /* Report 001: Current Active MSK Case Lifecycle */
+        function renderTPAPerf1() {
+            var body = document.getElementById('reportBody');
+            var o = TPA_OVERVIEW;
+            var phaseEval = 166, phaseTx = 320, phasePostOp = 106, total = o.activeCases;
+            body.innerHTML =
+                tpaSecLabel('Fiduciary Vital Signs') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card warn"><div class="hero-label">Total Est. Financial Exposure</div><div class="hero-value">$5.2M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Aggregate at-risk dollars across all active cases</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Active Member Census</div><div class="hero-value">' + o.activeCases.toLocaleString() + '</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Unique members currently enrolled in MSK program</div></div>' +
+                '<div class="info-hero-card accent"><div class="hero-label">Aggregate Clinical Progression</div><div class="hero-value">67%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Avg completion across all active treatment pathways</div></div></div>' +
+                tpaSecLabel('Operational Velocity') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Volume by Clinical Phase</h4>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Active Treatment</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(phaseTx/total*100) + '%; background:var(--primary-navy);"></div></div><span class="info-bar-pct">' + phaseTx + '</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Evaluation</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(phaseEval/total*100) + '%; background:#cc8800;"></div></div><span class="info-bar-pct">' + phaseEval + '</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Post-Op / Recovery</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(phasePostOp/total*100) + '%; background:#0a8f2c;"></div></div><span class="info-bar-pct">' + phasePostOp + '</span></div></div>' +
+                '<div class="info-panel"><h4>Cycle Time Average vs. Benchmark</h4>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">8.4d</div><div class="mini-label">Evaluation Avg</div><div style="font-size:0.58rem;color:#999;margin-top:0.2rem;">Benchmark: 7.0d</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">42.1d</div><div class="mini-label">Active Tx Avg</div><div style="font-size:0.58rem;color:#999;margin-top:0.2rem;">Benchmark: 40.0d</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">28.6d</div><div class="mini-label">Post-Op Avg</div><div style="font-size:0.58rem;color:#999;margin-top:0.2rem;">Benchmark: 28.0d</div></div></div>' +
+                '<div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid #f0f0f0;"><h4 style="margin-bottom:0.4rem;">TPA Data Sync Status</h4>' +
+                '<div style="display:flex;align-items:center;gap:0.5rem;"><span style="width:8px;height:8px;border-radius:50%;background:#0a8f2c;display:inline-block;box-shadow:0 0 5px #0a8f2c;"></span>' +
+                '<span style="font-size:0.78rem;font-weight:800;color:#0a8f2c;">Connected</span><span style="font-size:0.72rem;color:#999;">Deep Hook API &mdash; Last sync: 4 min ago</span></div></div></div></div>' +
+                tpaSecLabel('Audit & Integrity Detail') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Member ID / Case ID</th><th>Clinical Pathway</th><th>Current Status</th><th>Last Milestone</th><th>Projected Completion</th><th>Est. Savings Value</th></tr></thead><tbody>' +
+                TPA_ACTIVE_CASES.map(function(c) {
+                    var sc = c.status === 'Active Treatment' ? 'var(--primary-navy)' : c.status === 'Evaluation' ? '#cc8800' : '#0a8f2c';
+                    return '<tr><td><span style="font-weight:800;">' + c.memberId + '</span><br><span style="color:#999;font-size:0.68rem;">' + c.caseId + '</span></td><td>' + c.pathway + '</td><td style="font-weight:700;color:' + sc + ';">' + c.status + '</td><td style="font-size:0.72rem;">' + c.lastMilestone + '</td><td style="white-space:nowrap;">' + c.projectedCompletion + '</td><td style="font-weight:800;color:#0a8f2c;">' + c.estimatedSavings + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 002: Case Friction & Intervention Log */
+        function renderTPAPerf2() {
+            var body = document.getElementById('reportBody');
+            var openCount = TPA_FRICTION_LOG.filter(function(f) { return f.interventionStatus === 'Open'; }).length;
+            var frictionRate = (openCount / TPA_OVERVIEW.activeCases * 100).toFixed(1);
+            var catTotals = {};
+            TPA_FRICTION_LOG.forEach(function(f) { catTotals[f.category] = (catTotals[f.category] || 0) + 1; });
+            var total = TPA_FRICTION_LOG.length;
+            var resolved = TPA_FRICTION_LOG.filter(function(f){ return f.interventionStatus==='Resolved'; }).length;
+            var inprog   = TPA_FRICTION_LOG.filter(function(f){ return f.interventionStatus==='In-Progress'; }).length;
+            var openN    = TPA_FRICTION_LOG.filter(function(f){ return f.interventionStatus==='Open'; }).length;
+            body.innerHTML =
+                tpaSecLabel('Fiduciary Vital Signs') +
+                '<div class="info-hero" style="grid-template-columns:repeat(2,1fr);">' +
+                '<div class="info-hero-card warn"><div class="hero-label">Critical Friction Rate (Open Cases)</div><div class="hero-value">' + frictionRate + '%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">% of total active cases flagged with open severity alert</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Avg Time-to-Resolution</div><div class="hero-value">3.2 days</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Speed at which flagged barriers are resolved by TPA or DR team</div></div></div>' +
+                tpaSecLabel('Operational Velocity') +
+                '<div class="info-row"><div class="info-panel"><h4>Friction Category Distribution</h4>' +
+                Object.entries(catTotals).map(function(e) {
+                    return '<div class="info-bar-row"><span class="info-bar-label" style="width:160px;">' + e[0] + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(e[1]/total*100) + '%; background:var(--secondary-red);"></div></div><span class="info-bar-pct">' + Math.round(e[1]/total*100) + '%</span></div>';
+                }).join('') +
+                '</div><div class="info-panel"><h4>Sentiment Trend &mdash; 30 Days</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.2rem;font-weight:900;color:#0a8f2c;">&#x2191; +4.2</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">pts vs prior 30 days</span></div>' +
+                '<div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.8rem;">Member feedback trending positive. Portfolio NPS at ' + TPA_OVERVIEW.nps + ' &mdash; above network benchmark of 72.</div>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">' + resolved + '</div><div class="mini-label">Resolved</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">' + inprog + '</div><div class="mini-label">In Progress</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:var(--secondary-red);">' + openN + '</div><div class="mini-label">Open</div></div></div></div></div>' +
+                tpaSecLabel('Audit & Integrity Detail') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Case ID</th><th>Case Manager</th><th>Flag Date</th><th>Category</th><th>Narrative / Comments</th><th>Intervention Status</th></tr></thead><tbody>' +
+                TPA_FRICTION_LOG.map(function(f) {
+                    var sc = f.interventionStatus === 'Resolved' ? '#0a8f2c' : f.interventionStatus === 'In-Progress' ? '#cc8800' : 'var(--secondary-red)';
+                    var cc = f.category === 'TPA Coordination Delay' ? 'var(--primary-navy)' : f.category === 'Member Dissatisfaction' ? 'var(--secondary-red)' : '#cc8800';
+                    return '<tr><td style="font-weight:800;">' + f.caseId + '</td><td>' + f.managerId + '</td><td style="white-space:nowrap;">' + f.flagDate + '</td><td style="font-size:0.72rem;font-weight:700;color:' + cc + ';">' + f.category + '</td><td style="font-size:0.72rem;max-width:220px;">' + f.narrative + '</td><td style="font-weight:700;white-space:nowrap;color:' + sc + ';">' + f.interventionStatus + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 003: High-Risk Stop Loss & Predictive Reserve */
+        function renderTPAPerf3() {
+            var body = document.getElementById('reportBody');
+            var o = TPA_OVERVIEW;
+            body.innerHTML =
+                tpaSecLabel('Fiduciary Vital Signs') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card warn"><div class="hero-label">Total Predictive Reserve</div><div class="hero-value">$1.34M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Total estimated future spend for high-cost cases in pipeline</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Probability of Breach Count</div><div class="hero-value">' + o.stopLossRisk + '</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Members with &ge;80% likelihood of exceeding Stop Loss deductible</div></div>' +
+                '<div class="info-hero-card accent"><div class="hero-label">Stop Loss Cost Avoidance</div><div class="hero-value">$340K</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Estimated savings from COE redirection of high-risk cases</div></div></div>' +
+                tpaSecLabel('Operational Velocity') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Intervention Success Rate</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.4rem;font-weight:900;color:#0a8f2c;">74%</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">high-risk cases managed below threshold</span></div>' +
+                '<div style="width:100%;height:10px;background:#f0f0f0;border-radius:5px;margin-bottom:0.5rem;"><div style="width:74%;height:100%;background:#0a8f2c;border-radius:5px;"></div></div>' +
+                '<div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);">Network benchmark: 68% &mdash; <span style="color:#0a8f2c;">+6 pts above benchmark</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.4rem;">% of High Risk cases successfully redirected or managed below stop-loss threshold.</div></div>' +
+                '<div class="info-panel"><h4>TPA Notification Latency</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.4rem;font-weight:900;color:var(--primary-navy);">1.8</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">days avg from detection to action</span></div>' +
+                '<div style="width:100%;height:10px;background:#f0f0f0;border-radius:5px;margin-bottom:0.5rem;"><div style="width:36%;height:100%;background:var(--primary-navy);border-radius:5px;"></div></div>' +
+                '<div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);">SLA target: &le;2.0 days &mdash; <span style="color:#0a8f2c;">&#x2713; Within SLA</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.4rem;">Time elapsed between Probability of Breach detection and TPA action execution.</div></div></div>' +
+                tpaSecLabel('Audit & Integrity Detail') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Member ID</th><th>YTD Spend</th><th>Predictive Future Spend</th><th>Prob. of Breach</th><th>Primary Diagnosis (ICD-10)</th><th>TPA Action Taken</th></tr></thead><tbody>' +
+                TPA_HIGH_RISK.map(function(m) {
+                    var bc = m.breachProb >= 90 ? 'var(--secondary-red)' : m.breachProb >= 80 ? '#cc8800' : '#666';
+                    return '<tr><td style="font-weight:800;">' + m.memberId + '</td><td>' + m.ytdSpend + '</td><td style="font-weight:700;color:var(--secondary-red);">' + m.predictiveSpend + '</td><td style="font-weight:900;font-size:0.9rem;color:' + bc + ';">' + m.breachProb + '%</td><td style="font-size:0.72rem;">' + m.icd10 + '</td><td style="font-size:0.72rem;font-weight:700;color:var(--primary-navy);">' + m.action + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 004: MSK Carve-Out Renewal & ROI Validation */
+        function renderTPA004() {
+            var body = document.getElementById('reportBody');
+            body.innerHTML =
+                tpaSecLabel('Executive Fiduciary Pulse') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card accent"><div class="hero-label">Net Program ROI</div><div class="hero-value">312%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Net savings vs. program administration cost over contract period</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">MSK Cost Trend Deflection</div><div class="hero-value">-8.7% YoY</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Portfolio cost trend vs. market benchmark of +5.2%</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">PEPM Savings Impact</div><div class="hero-value">$14.20</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Per employee per month savings attributed to MSK program</div></div>' +
+                '</div>' +
+                tpaSecLabel('Strategic Performance Drivers') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Surgical Avoidance Rate</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.4rem;font-weight:900;color:#0a8f2c;">94%</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">of members diverted from surgical pathway</span></div>' +
+                '<div style="width:100%;height:10px;background:#f0f0f0;border-radius:5px;margin-bottom:0.5rem;"><div style="width:94%;height:100%;background:#0a8f2c;border-radius:5px;"></div></div>' +
+                '<div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);">Network benchmark: 78% &mdash; <span style="color:#0a8f2c;">+16 pts above benchmark</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.4rem;">Members completing conservative care protocol without requiring surgical intervention.</div></div>' +
+                '<div class="info-panel"><h4>Member Outcomes &amp; Retention</h4>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">94%</div><div class="mini-label">Surgery-Free</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:var(--primary-navy);">80</div><div class="mini-label">Portfolio NPS</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">3.2%</div><div class="mini-label">Leakage Rate</div></div>' +
+                '</div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.8rem;">Network leakage: members who bypassed program and sought out-of-network surgical care.</div></div>' +
+                '</div>' +
+                tpaSecLabel('Audit Transaction Ledger') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Plan Sponsor</th><th>YoY Cost Change</th><th>Admin Fee Reconciliation</th><th>Perf. Guarantee</th><th>Rebate / Credit</th><th>Renewal Milestone</th></tr></thead><tbody>' +
+                TPA_RENEWAL_LEDGER.map(function(r) {
+                    var pc = parseFloat(r.yoyChange) < 0 ? '#0a8f2c' : 'var(--secondary-red)';
+                    var gc = r.perfGuarantee === 'Exceeded' ? '#0a8f2c' : r.perfGuarantee === 'Met' ? 'var(--primary-navy)' : '#cc8800';
+                    return '<tr><td style="font-weight:800;">' + r.sponsor + '</td><td style="font-weight:900;color:' + pc + ';">' + r.yoyChange + '</td><td>' + r.adminFee + '</td><td style="font-weight:700;color:' + gc + ';">' + r.perfGuarantee + '</td><td style="font-weight:800;color:#0a8f2c;">' + r.rebate + '</td><td style="font-size:0.72rem;">' + r.milestone + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 005: Plan Sponsor Fiduciary Scorecard */
+        function renderTPA005() {
+            var body = document.getElementById('reportBody');
+            body.innerHTML =
+                tpaSecLabel('Executive Fiduciary Pulse') +
+                '<div class="info-hero" style="grid-template-columns:repeat(2,1fr);">' +
+                '<div class="info-hero-card warn"><div class="hero-label">Total Cost of Risk (TCOR)</div><div class="hero-value">$1.42M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Aggregate plan risk including claims, admin, and stop-loss exposure</div></div>' +
+                '<div class="info-hero-card accent"><div class="hero-label">Fiduciary Compliance Health</div><div class="hero-value">94%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Combined score across SLA adherence, document compliance, and audit readiness</div></div>' +
+                '</div>' +
+                tpaSecLabel('Strategic Performance Drivers') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>TPA Operational Quality</h4>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">98.4%</div><div class="mini-label">Adjudication Accuracy</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">99.7%</div><div class="mini-label">API Uptime</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:var(--primary-navy);">1.6d</div><div class="mini-label">Avg Response Time</div></div>' +
+                '</div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.8rem;">Adjudication accuracy measures correctly processed claims vs. total. API uptime reflects Deep Hook integration availability.</div></div>' +
+                '<div class="info-panel"><h4>Appeals &amp; Grievances</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.4rem;font-weight:900;color:var(--primary-navy);">18</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">total in reporting period</span></div>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">14</div><div class="mini-label">Closed</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">3</div><div class="mini-label">In Review</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:var(--secondary-red);">1</div><div class="mini-label">Escalated</div></div>' +
+                '</div></div>' +
+                '</div>' +
+                tpaSecLabel('Audit Transaction Ledger') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Plan Sponsor</th><th>SLA Penalties</th><th>Plan Doc Amendments</th><th>Avg Response Time</th><th>Fee Disclosure</th><th>Audit Status</th></tr></thead><tbody>' +
+                TPA_FIDUCIARY_LEDGER.map(function(r) {
+                    var sc = r.slaPenalties === '$0' ? '#0a8f2c' : 'var(--secondary-red)';
+                    var dc = r.feeDisclosure === 'Current' ? '#0a8f2c' : '#cc8800';
+                    var ac = r.auditStatus === 'Clean' ? '#0a8f2c' : r.auditStatus === 'Reviewed' ? 'var(--primary-navy)' : '#cc8800';
+                    return '<tr><td style="font-weight:800;">' + r.sponsor + '</td><td style="font-weight:700;color:' + sc + ';">' + r.slaPenalties + '</td><td>' + r.planAmendments + '</td><td>' + r.avgResponseTime + '</td><td style="font-weight:700;color:' + dc + ';">' + r.feeDisclosure + '</td><td style="font-weight:700;color:' + ac + ';">' + r.auditStatus + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 006: Claims & Billing Transparency Summary */
+        function renderTPA006() {
+            var body = document.getElementById('reportBody');
+            body.innerHTML =
+                tpaSecLabel('Executive Fiduciary Pulse') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card"><div class="hero-label">Gross Paid Claims (Period)</div><div class="hero-value">$2.84M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Total gross claims paid across all plan sponsors this period</div></div>' +
+                '<div class="info-hero-card accent"><div class="hero-label">Net Paid After Savings</div><div class="hero-value">$1.66M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Net cost after applying program discounts, avoidance, and COE savings</div></div>' +
+                '<div class="info-hero-card warn"><div class="hero-label">Stop Loss Recovery Pending</div><div class="hero-value">$180K</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Reinsurance recovery filings awaiting carrier adjudication</div></div>' +
+                '</div>' +
+                tpaSecLabel('Strategic Performance Drivers') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Spend by MSK Category</h4>' +
+                '<div class="info-bar-row"><span class="info-bar-label">PT / Conservative Care</span><div class="info-bar-track"><div class="info-bar-fill" style="width:45%; background:var(--primary-navy);"></div></div><span class="info-bar-pct">45%</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Surgical Cases</span><div class="info-bar-track"><div class="info-bar-fill" style="width:28%; background:var(--secondary-red);"></div></div><span class="info-bar-pct">28%</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Imaging &amp; Diagnostics</span><div class="info-bar-track"><div class="info-bar-fill" style="width:15%; background:#cc8800;"></div></div><span class="info-bar-pct">15%</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">DME &amp; Other</span><div class="info-bar-track"><div class="info-bar-fill" style="width:12%; background:#999;"></div></div><span class="info-bar-pct">12%</span></div>' +
+                '</div>' +
+                '<div class="info-panel"><h4>Claims Integrity Flags</h4>' +
+                '<div class="info-mini-grid">' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#cc8800;">3</div><div class="mini-label">Duplicate Flags</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:var(--secondary-red);">2</div><div class="mini-label">Discount Shortfall</div></div>' +
+                '<div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">$4,200</div><div class="mini-label">Savings Confirmed</div></div>' +
+                '</div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.8rem;">Provider discount verification flags claims where contractual discount was not fully applied. Duplicate detection cross-references service date, NPI, and procedure code.</div></div>' +
+                '</div>' +
+                tpaSecLabel('Audit Transaction Ledger') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Claim ID</th><th>Service Date</th><th>NPI / Tax ID</th><th>ICD-10 / CPT</th><th>Billed</th><th>Allowed</th><th>Member Cost Share</th><th>Remark Code</th></tr></thead><tbody>' +
+                TPA_CLAIMS_LEDGER.map(function(c) {
+                    return '<tr><td style="font-weight:800;">' + c.claimId + '</td><td style="white-space:nowrap;">' + c.serviceDate + '</td><td style="font-size:0.68rem;color:#999;">' + c.npiTaxId + '</td><td style="font-size:0.72rem;">' + c.icdCpt + '</td><td>' + c.billed + '</td><td style="font-weight:700;color:#0a8f2c;">' + c.allowed + '</td><td>' + c.memberShare + '</td><td style="font-size:0.72rem;color:#999;">' + c.remarkCode + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 007: Member Clinical Outcomes & Productivity Tracker */
+        function renderTPA007() {
+            var body = document.getElementById('reportBody');
+            var avgPainInit = (TPA_MEMBER_OUTCOMES.reduce(function(s,m){ return s + m.painInitial; }, 0) / TPA_MEMBER_OUTCOMES.length).toFixed(1);
+            var avgPainCurr = (TPA_MEMBER_OUTCOMES.reduce(function(s,m){ return s + m.painCurrent; }, 0) / TPA_MEMBER_OUTCOMES.length).toFixed(1);
+            var painReduction = (((avgPainInit - avgPainCurr) / avgPainInit) * 100).toFixed(0);
+            var completed = TPA_MEMBER_OUTCOMES.filter(function(m){ return m.milestoneCompletion === 100; }).length;
+            body.innerHTML =
+                tpaSecLabel('Clinical Economic Impact') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card accent"><div class="hero-label">Avg RTW Acceleration</div><div class="hero-value">-42%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Reduction in days away from work vs. traditional TPA-managed MSK cases</div></div>' +
+                '<div class="info-hero-card accent"><div class="hero-label">Surgery Avoidance Success</div><div class="hero-value">94%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Members who completed conservative pathway and avoided scheduled surgery</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Functional Improvement Index</div><div class="hero-value">78/100</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Aggregate PROM score reflecting mobility and pain reduction across portfolio</div></div>' +
+                '</div>' +
+                tpaSecLabel('Engagement & Recovery Velocity') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Care Pathway Adherence</h4>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;margin-bottom:0.5rem;"><span style="font-size:2.4rem;font-weight:900;color:#0a8f2c;">87%</span><span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">members consistently completing prescriptions</span></div>' +
+                '<div style="width:100%;height:10px;background:#f0f0f0;border-radius:5px;margin-bottom:0.5rem;"><div style="width:87%;height:100%;background:#0a8f2c;border-radius:5px;"></div></div>' +
+                '<div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);">Network benchmark: 71% &mdash; <span style="color:#0a8f2c;">+16 pts above benchmark</span></div>' +
+                '</div>' +
+                '<div class="info-panel"><h4>Patient-Directed Functional Improvement (PDFI)</h4>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">' +
+                '<div style="text-align:center;padding:0.8rem;background:#fafafa;border-radius:6px;border:1px solid #eee;"><div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#999;margin-bottom:0.3rem;">Avg Intake Score</div><div style="font-size:2.4rem;font-weight:900;color:var(--secondary-red);">' + avgPainInit + '</div></div>' +
+                '<div style="text-align:center;padding:0.8rem;background:#fafafa;border-radius:6px;border:1px solid #eee;"><div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#999;margin-bottom:0.3rem;">Avg Current Score</div><div style="font-size:2.4rem;font-weight:900;color:#0a8f2c;">' + avgPainCurr + '</div></div>' +
+                '</div>' +
+                '<div style="text-align:center;padding:0.6rem;background:#f0fff4;border-radius:6px;border:1px solid #c3f0d0;">' +
+                '<span style="font-size:1.1rem;font-weight:900;color:#0a8f2c;">&#x2193; ' + painReduction + '% reduction</span>' +
+                '<span style="font-size:0.68rem;color:#0a8f2c;margin-left:0.4rem;">portfolio average</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.6rem;">Member-defined functional goal achievement score. Higher score indicates greater functional recovery.</div></div>' +
+                '</div>' +
+                tpaSecLabel('Member Forensic Detail') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Member ID</th><th>Diagnosis Group</th><th>Pain Score (Intake / Current)</th><th>Expected RTW</th><th>Actual RTW</th><th>Milestone Completion</th><th>CSAT</th></tr></thead><tbody>' +
+                TPA_MEMBER_OUTCOMES.map(function(m) {
+                    var pc = m.painCurrent < m.painInitial * 0.5 ? '#0a8f2c' : m.painCurrent < m.painInitial * 0.75 ? '#cc8800' : 'var(--secondary-red)';
+                    var mc = m.milestoneCompletion === 100 ? '#0a8f2c' : m.milestoneCompletion >= 60 ? '#cc8800' : 'var(--secondary-red)';
+                    var rtwColor = m.rtwActual === 'Pending' ? '#999' : m.rtwActual <= m.rtwExpected ? '#0a8f2c' : 'var(--secondary-red)';
+                    var csatColor = m.csat >= 9 ? '#0a8f2c' : m.csat >= 7 ? '#cc8800' : 'var(--secondary-red)';
+                    return '<tr><td style="font-weight:800;">' + m.memberId + '</td><td>' + m.diagGroup + '</td>' +
+                        '<td><span style="color:var(--secondary-red);font-weight:700;">' + m.painInitial + '</span> &rarr; <span style="font-weight:900;color:' + pc + ';">' + m.painCurrent + '</span></td>' +
+                        '<td style="white-space:nowrap;">' + m.rtwExpected + '</td>' +
+                        '<td style="white-space:nowrap;font-weight:700;color:' + rtwColor + ';">' + m.rtwActual + '</td>' +
+                        '<td><div style="display:flex;align-items:center;gap:0.4rem;"><div style="flex:1;height:6px;background:#f0f0f0;border-radius:3px;"><div style="width:' + m.milestoneCompletion + '%;height:100%;background:' + mc + ';border-radius:3px;"></div></div><span style="font-weight:700;color:' + mc + ';white-space:nowrap;">' + m.milestoneCompletion + '%</span></div></td>' +
+                        '<td style="font-weight:900;font-size:0.9rem;color:' + csatColor + ';">' + m.csat + '/10</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* Report 008: Comparative Cost Savings & ROI by Client */
+        function renderTPA008() {
+            var body = document.getElementById('reportBody');
+            var totalSavings = TPA_SAVINGS_DETAIL.reduce(function(s, c) {
+                return s + parseInt(c.savings.replace(/[$,]/g, ''));
+            }, 0);
+            var avoidCount = TPA_SAVINGS_DETAIL.filter(function(c){ return c.savingsCategory === 'Volume Avoidance'; }).length;
+            body.innerHTML =
+                tpaSecLabel('Clinical Economic Impact') +
+                '<div class="info-hero" style="grid-template-columns:repeat(3,1fr);">' +
+                '<div class="info-hero-card accent"><div class="hero-label">Total Documented Savings (Net)</div><div class="hero-value">$1.18M</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Gross savings from avoided procedures and lower rates, minus MSK vendor fees</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Savings Per Enrolled Member</div><div class="hero-value">$2,140</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">Average financial benefit per member who engaged with the carve-out</div></div>' +
+                '<div class="info-hero-card"><div class="hero-label">Projected vs. Actual Variance</div><div class="hero-value">-2.3%</div><div style="font-size:0.62rem;opacity:0.75;margin-top:0.3rem;">30% reduction claim tracks within -2.3% of initial actuarial projection</div></div>' +
+                '</div>' +
+                tpaSecLabel('Engagement & Recovery Velocity') +
+                '<div class="info-row">' +
+                '<div class="info-panel"><h4>Spend by Site of Service</h4>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:0.6rem;">Shift from high-cost inpatient to lower-cost outpatient and home-based care.</div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Outpatient Facility</span><div class="info-bar-track"><div class="info-bar-fill" style="width:48%; background:var(--primary-navy);"></div></div><span class="info-bar-pct">48%</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Home-Based / PT</span><div class="info-bar-track"><div class="info-bar-fill" style="width:28%; background:#0a8f2c;"></div></div><span class="info-bar-pct">28%</span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Inpatient Hospital</span><div class="info-bar-track"><div class="info-bar-fill" style="width:12%; background:var(--secondary-red);"></div></div><span class="info-bar-pct">12% <span style="font-size:0.62rem;color:#0a8f2c;">(&#x2193; from 34%)</span></span></div>' +
+                '<div class="info-bar-row"><span class="info-bar-label">Other</span><div class="info-bar-track"><div class="info-bar-fill" style="width:12%; background:#bbb;"></div></div><span class="info-bar-pct">12%</span></div>' +
+                '</div>' +
+                '<div class="info-panel"><h4>Claims Avoidance &amp; Discount Depth</h4>' +
+                '<div style="margin-bottom:0.8rem;">' +
+                '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#999;margin-bottom:0.2rem;">Avoided High-Cost CPT Codes</div>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;"><span style="font-size:2.2rem;font-weight:900;color:#0a8f2c;">' + avoidCount + '</span><span style="font-size:0.75rem;color:var(--text-muted);">surgeries / MRIs avoided this period</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);">High-cost CPT codes canceled in favor of conservative DR pathways.</div></div>' +
+                '<div style="padding-top:0.8rem;border-top:1px solid #f0f0f0;">' +
+                '<div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#999;margin-bottom:0.2rem;">Deep Hook Network Discount Depth</div>' +
+                '<div style="display:flex;align-items:baseline;gap:0.4rem;"><span style="font-size:2.2rem;font-weight:900;color:var(--primary-navy);">28.4%</span><span style="font-size:0.75rem;color:var(--text-muted);">below standard PPO contracted rate</span></div>' +
+                '<div style="font-size:0.65rem;color:var(--text-muted);">Difference between TPA standard PPO rate and DR Deep Hook contracted rate.</div></div>' +
+                '</div>' +
+                '</div>' +
+                tpaSecLabel('Member Forensic Detail') +
+                '<div class="info-panel" style="margin-bottom:0.8rem;"><table class="info-table"><thead><tr><th>Claim ID</th><th>Procedure Description</th><th>Original TPA Est. Cost</th><th>Actual DR Carve-out Cost</th><th>Realized Savings</th><th>Savings Category</th><th>Date Realized</th></tr></thead><tbody>' +
+                TPA_SAVINGS_DETAIL.map(function(c) {
+                    var sc = c.savingsCategory === 'Volume Avoidance' ? 'var(--primary-navy)' : c.savingsCategory === 'Site Shift' ? '#cc8800' : '#0a8f2c';
+                    return '<tr><td style="font-weight:800;">' + c.claimId + '</td><td>' + c.procedureDesc + '</td>' +
+                        '<td style="font-size:0.78rem;">' + c.tpaCost + '</td>' +
+                        '<td style="font-weight:700;color:#0a8f2c;">' + c.drCost + '</td>' +
+                        '<td style="font-weight:900;color:#0a8f2c;">' + c.savings + '</td>' +
+                        '<td><span style="font-size:0.68rem;font-weight:700;color:' + sc + ';background:' + sc.replace(')', ',0.08)').replace('var(', 'rgba(').replace('--primary-navy', '10,20,60').replace('--secondary-red', '180,20,20') + ';padding:2px 6px;border-radius:3px;">' + c.savingsCategory + '</span></td>' +
+                        '<td style="white-space:nowrap;font-size:0.72rem;">' + c.dateSaved + '</td></tr>';
+                }).join('') +
+                '</tbody></table></div>';
+        }
+
+        /* --- Researcher Overview --- */
+        function renderResearchAnalytics() {
+            const body = document.getElementById('reportBody');
+            const o = RESEARCH_OVERVIEW;
+            body.innerHTML = `
+                <div class="info-hero">
+                    <div class="info-hero-card"><div class="hero-label">Active Projects</div><div class="hero-value">${o.activeProjects}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Total Subjects</div><div class="hero-value">${o.totalSubjects.toLocaleString()}</div></div>
+                    <div class="info-hero-card accent"><div class="hero-label">Data Completeness</div><div class="hero-value">${o.dataCompleteness}</div></div>
+                    <div class="info-hero-card"><div class="hero-label">Datasets Available</div><div class="hero-value">${o.datasetsAvailable}</div></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-panel">
+                        <h4>Research Activity</h4>
+                        <div class="info-mini-grid">
+                            <div class="info-mini-card"><div class="mini-val" style="color:#0a8f2c;">${o.publishedStudies}</div><div class="mini-label">Published Studies</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${o.pendingIRB}</div><div class="mini-label">Pending IRB</div></div>
+                            <div class="info-mini-card"><div class="mini-val">${o.datasetsAvailable}</div><div class="mini-label">Datasets</div></div>
+                        </div>
+                    </div>
+                    <div class="info-panel">
+                        <h4>Subjects by Project</h4>
+                        ${RESEARCH_PROJECTS.filter(p => p.subjects > 0).map(p => '<div class="info-bar-row"><span class="info-bar-label">' + (p.name.length > 22 ? p.name.slice(0,22) + '...' : p.name) + '</span><div class="info-bar-track"><div class="info-bar-fill" style="width:' + Math.round(p.subjects / 28) + '%; background:var(--primary-navy);"></div></div><span class="info-bar-pct">' + p.subjects + '</span></div>').join('')}
+                    </div>
+                </div>
+                <div class="info-panel" style="margin-bottom:0.8rem;">
+                    <h4>All Research Projects — Status</h4>
+                    <table class="info-table">
+                        <thead><tr><th>Project</th><th>PI</th><th>Status</th><th>Subjects</th><th>Institution</th><th>IRB</th><th>Protocol</th></tr></thead>
+                        <tbody>${RESEARCH_PROJECTS.map(p => '<tr><td>' + p.name + '</td><td>' + p.pi + '</td><td style="color:' + (p.irb === 'Approved' ? '#0a8f2c' : '#cc8800') + '; font-weight:700;">' + p.status + '</td><td>' + p.subjects + '</td><td>' + p.institution + '</td><td>' + p.irb + '</td><td>' + p.protocol + '</td></tr>').join('')}</tbody>
+                    </table>
+                </div>`;
+        }
+
+        /* --- Ad Hoc & Placeholder --- */
+        function renderAdHoc() {
+            document.getElementById('reportBody').innerHTML = `
+                <div class="placeholder-view">
+                    <h2>Ad Hoc Report Builder</h2>
+                    <p>Build custom queries against network data. Select dimensions, measures, filters, and visualization type to create on-demand reports.</p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; width:100%; max-width:600px; margin-top:2rem;">
+                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
+                            <h4 style="margin-bottom:0.3rem;">Data Source</h4>
+                            <p style="font-size:0.8rem; color:#999; margin:0;">Patients, Practices, Referrals, PROMs, Billing</p>
+                        </div>
+                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
+                            <h4 style="margin-bottom:0.3rem;">Dimensions</h4>
+                            <p style="font-size:0.8rem; color:#999; margin:0;">Provider, Practice, Date Range, Diagnosis</p>
+                        </div>
+                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
+                            <h4 style="margin-bottom:0.3rem;">Measures</h4>
+                            <p style="font-size:0.8rem; color:#999; margin:0;">Cost, Savings, Outcomes, Compliance, Volume</p>
+                        </div>
+                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
+                            <h4 style="margin-bottom:0.3rem;">Visualization</h4>
+                            <p style="font-size:0.8rem; color:#999; margin:0;">Table, Bar Chart, Line Chart, Scorecard</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top:1.5rem; padding:0.8rem 2rem; font-size:0.9rem; opacity:0.5; cursor:not-allowed;">Run Query</button>
+                    <span class="placeholder-tag">Coming Soon</span>
+                </div>`;
+        }
+
+        function renderPlaceholder(r) {
+            document.getElementById('reportBody').innerHTML = `
+                <div class="placeholder-view">
+                    <h2>${r.name}</h2>
+                    <p>${r.desc}</p>
+                    <span class="placeholder-tag">Report Not Yet Configured</span>
+                </div>`;
+        }
+
+        /* --- Init: load data files, build UI --- */
+        (function() {
+            const config = ROUTER.getConfig();
+            ROUTER.loadDataFiles(config).then(() => {
+                ROUTER.init('analytics');
+                // Mark analytics nav as active
+                const analyticsNav = document.getElementById('nav-analytics');
+                if (analyticsNav) analyticsNav.classList.add('active');
+                // Load audience-specific reports
+                REPORTS = ROUTER.getReports();
+                // Default to the overview (_top) report, or first report
+                const topReport = REPORTS.find(r => r.cat === '_top');
+                activeReport = topReport ? topReport.id : REPORTS[0].id;
+                buildSidebar();
+                // honour deep-link: ?report=<id>
+                const rParam = new URLSearchParams(window.location.search).get('report');
+                if (rParam && REPORTS.find(r => r.id === rParam)) activeReport = rParam;
+                selectReport(activeReport);
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Derived Results | Master Controller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-brand">
+            <a class="logo-area" href="./selector.html" data-branding="org-name">Derived Results</a>
+            <span class="powered-badge">Powered by <strong>Derived Results</strong></span>
+        </div>
+        <div class="view-toggle" id="viewToggle" style="display:none;">
+            <button class="toggle-btn active" id="toggleOps" onclick="setViewMode('ops')">Operational View</button>
+            <button class="toggle-btn" id="toggleClient" onclick="setViewMode('client')">Client View</button>
+        </div>
+        <nav id="topNav"></nav>
+        <div class="reconciliation-badge">&#x2713; Verified against <span data-branding="org-name">Derived Results</span> Claims System</div>
+    </header>
+    <div class="wrapper">
+        <aside class="sidebar">
+            <div class="search-container"><input type="text" id="searchBox" placeholder="Search..."><button id="addBtn" class="btn btn-primary hidden" onclick="WIZARD.open()" style="width:100%; margin-top:15px;">+ Add New Practice</button></div>
+            <div id="savingsInfoLink" style="display:none; padding:0.2rem 1.2rem 0.6rem;">
+                <span style="font-size:0.71rem; font-weight:700; color:var(--primary-navy); opacity:0.55; cursor:help;"
+                      onmouseenter="showSavingsTip(event)" onmouseleave="hideSavingsTip()">ⓘ Details about attributed savings</span>
+            </div>
+            <nav class="list-container" id="sidebarList"></nav>
+        </aside>
+        <main id="mainContent">
+            <div id="overviewContainer">
+                <div id="overviewHeader" class="hidden detail-header"></div>
+                <div class="view-section">
+                    <h1 id="vTitle" style="font-weight: 800; font-size: 2.8rem; margin:0; color:var(--primary-navy);"></h1>
+                    <p id="vSub" style="color:var(--text-muted); font-weight:600; margin-top:0.8rem;"></p>
+                    <div id="vContent"></div>
+                </div>
+            </div>
+            <section id="detailContainer" class="hidden" style="display:flex; flex-direction:column; height:100%;">
+                <div id="detailHeader" class="detail-header" style="flex-shrink:0;"></div>
+                <div id="detailTabs" class="hidden" style="flex-shrink:0;"></div>
+                <div id="detailBody" class="view-section" style="background:white; padding-top:2rem; flex:1; overflow-y:auto;"></div>
+            </section>
+        </main>
+    </div>
+    <script src="./mock-data.js"></script><script src="./templates.js"></script><script src="./wizard.js"></script>
+    <script src="./view-config.js"></script><script src="./router.js"></script><script src="./branding.js"></script>
+    <script>
+        let mode = '';
+
+        /* --- Detail header builders (audience-specific formatting) --- */
+        const DETAIL_HEADERS = {
+            patientHeader: (item) =>
+                '<div><h2 style="margin:0;">' + item.name + '</h2><div style="font-size:0.9rem; opacity:0.8; margin-top:4px;">DOB: ' + item.dob + ' &nbsp;|&nbsp; Age: ' + item.age + '</div></div><div class="header-actions"><button class="btn btn-action">Add Note</button><button class="btn btn-action">Message</button><button class="btn btn-action">See Images</button></div>',
+            practiceHeader: (item) =>
+                '<div><h2 style="margin:0;">' + item.name + '</h2></div><div class="header-actions"><button class="btn btn-action">Edit Practice</button><button class="btn btn-action">Run Report</button><button class="btn btn-action">Audit Billing</button><button class="btn btn-action">Staff Alert</button></div>',
+            simpleHeader: (item) =>
+                '<div><h2 style="margin:0;">' + item.name + '</h2></div><div class="header-actions"><button class="btn btn-action">View Details</button><button class="btn btn-action">Message</button></div>',
+            tpaClientHeader: (item) =>
+                '<div><h2 style="margin:0;">' + item.name + '</h2><div style="font-size:0.9rem; opacity:0.8; margin-top:4px;">' + item.memberCount.toLocaleString() + ' Members &nbsp;|&nbsp; ' + item.planType + ' &nbsp;|&nbsp; ' + item.region + ' &nbsp;|&nbsp; Savings Velocity: <strong>' + item.savingsVelocityLabel + '/30d</strong></div></div><div class="header-actions"><button class="btn btn-action">Run Report</button><button class="btn btn-action">Renewal Prep</button><button class="btn btn-action">Message</button></div>'
+        };
+
+        function switchMode(m) {
+            const config = ROUTER.getConfig();
+            mode = m;
+
+            document.querySelectorAll('#topNav a').forEach(a => a.classList.remove('active'));
+            const navItem = document.getElementById('nav-' + m);
+            if (navItem) navItem.classList.add('active');
+
+            const modeConfig = config.homeModes[m];
+            if (!modeConfig) return;
+
+            const addBtn = document.getElementById('addBtn');
+            addBtn.classList.toggle('hidden', !modeConfig.showAddButton);
+            if (modeConfig.addButtonLabel) addBtn.textContent = modeConfig.addButtonLabel;
+
+            document.getElementById('searchBox').placeholder = modeConfig.searchPlaceholder || 'Search...';
+
+            const savingsInfo = document.getElementById('savingsInfoLink');
+            if (savingsInfo) savingsInfo.style.display = (ROUTER.getView() === 'tpa' && m === 'clients') ? 'block' : 'none';
+            renderSidebar(); renderOverview(); clearSelection();
+        }
+
+        function renderSidebar() {
+            const config = ROUTER.getConfig();
+            const modeConfig = config.homeModes[mode];
+            const list = document.getElementById('sidebarList');
+
+            let items = window[modeConfig.dataSource];
+            if (!items) { list.innerHTML = ''; return; }
+
+            if (modeConfig.sortField) {
+                items = [...items].sort((a, b) => {
+                    const av = a[modeConfig.sortField];
+                    const bv = b[modeConfig.sortField];
+                    if (typeof av === 'number' && typeof bv === 'number') {
+                        return modeConfig.sortDir === 'desc' ? bv - av : av - bv;
+                    }
+                    const as = String(av), bs = String(bv);
+                    return modeConfig.sortDir === 'desc' ? bs.localeCompare(as) : as.localeCompare(bs);
+                });
+            }
+
+            list.innerHTML = items.map(i => {
+                let sub = String(i[modeConfig.itemSubField] || '');
+                if (modeConfig.itemSubPrefix) sub = modeConfig.itemSubPrefix + sub;
+                if (modeConfig.itemSubSuffix) sub = sub + modeConfig.itemSubSuffix;
+                return '<button class="list-item" onclick="selectItem(\'' + i.id + '\')" id="item-' + i.id + '"><span class="item-main">' + i[modeConfig.itemMainField] + '</span><span class="item-sub">' + sub + '</span></button>';
+            }).join('');
+        }
+
+        function renderOverview() {
+            const config = ROUTER.getConfig();
+            const modeConfig = config.homeModes[mode];
+            const t = document.getElementById('vTitle'); const s = document.getElementById('vSub'); const c = document.getElementById('vContent');
+            const oh = document.getElementById('overviewHeader');
+            t.style.display = 'none'; s.style.display = 'none';
+            oh.classList.remove('hidden');
+
+            const entity = ROUTER.resolveDataSource(modeConfig.overviewEntity);
+            let title = modeConfig.overviewHeader.title;
+            if (entity && entity.name) title = title.replace('{entity.name}', entity.name);
+            title = title.replace('{org}', localStorage.getItem('dr_target_org') || 'Derived Results');
+
+            oh.innerHTML = '<div><h2 style="margin:0;">' + title + '</h2><div style="font-size:0.9rem; opacity:0.8; margin-top:4px;">' + modeConfig.overviewHeader.subtitle + '</div></div><div class="header-actions">' + modeConfig.overviewActions.map(a => {
+                if (typeof a === 'object' && a.href) return '<a href="' + ROUTER.buildUrl(a.href) + '" class="btn btn-action">' + a.label + '</a>';
+                return '<button class="btn btn-action">' + (typeof a === 'string' ? a : a.label) + '</button>';
+            }).join('') + '</div>';
+
+            c.innerHTML = TEMPLATES[modeConfig.overviewTemplate](entity);
+        }
+
+        function selectItem(id) {
+            const config = ROUTER.getConfig();
+            const modeConfig = config.homeModes[mode];
+
+            document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('item-' + id).classList.add('active');
+            document.getElementById('overviewContainer').classList.add('hidden');
+            document.getElementById('detailContainer').classList.remove('hidden');
+
+            const items = window[modeConfig.dataSource];
+            const item = items.find(i => i.id === id);
+            const h = document.getElementById('detailHeader');
+            const b = document.getElementById('detailBody');
+            const tabs = document.getElementById('detailTabs');
+
+            /* Detail header */
+            const headerFn = DETAIL_HEADERS[modeConfig.detailHeaderBuilder];
+            h.innerHTML = headerFn ? headerFn(item) : '<div><h2 style="margin:0;">' + item.name + '</h2></div>';
+
+            /* Tabs */
+            if (modeConfig.detailHasTabs && modeConfig.tabs) {
+                tabs.classList.remove('hidden');
+                tabs.innerHTML = '<div class="detail-tabs"><div class="tab-list">' +
+                    modeConfig.tabs.map((t, i) => '<button class="tab-item' + (i === 0 ? ' active' : '') + '">' + t + '</button>').join('') +
+                    '</div>' + (modeConfig.quickActions ? '<div class="tab-actions"><span class="tab-actions-label">Quick Actions</span>' +
+                    modeConfig.quickActions.map(a => '<button class="btn-tab-action">' + a + '</button>').join('') + '</div>' : '') + '</div>';
+            } else {
+                tabs.classList.add('hidden');
+            }
+
+            /* Body */
+            b.innerHTML = TEMPLATES[modeConfig.detailTemplate](item);
+        }
+
+        function clearSelection() {
+            document.getElementById('overviewContainer').classList.remove('hidden');
+            document.getElementById('detailContainer').classList.add('hidden');
+            document.getElementById('detailTabs').classList.add('hidden');
+        }
+
+        /* --- Initialize: load audience data files, then boot --- */
+        (function() {
+            const config = ROUTER.getConfig();
+            ROUTER.loadDataFiles(config).then(() => {
+                ROUTER.init('dashboard');
+                if (ROUTER.getView() === 'tpa') document.getElementById('viewToggle').style.display = 'flex';
+                const homeNav = config.nav.find(n => n.isHome);
+                switchMode(homeNav ? homeNav.mode : Object.keys(config.homeModes)[0]);
+            });
+        })();
+
+        function showSavingsTip(e) {
+            var box = document.getElementById('savingsTipBox');
+            box.style.display = 'block';
+            box.style.left = Math.min(e.clientX + 12, window.innerWidth - 330) + 'px';
+            box.style.top = (e.clientY + 14) + 'px';
+        }
+        function hideSavingsTip() {
+            document.getElementById('savingsTipBox').style.display = 'none';
+        }
+        function setViewMode(mode) {
+            document.body.classList.toggle('client-view-active', mode === 'client');
+            document.getElementById('toggleOps').classList.toggle('active', mode === 'ops');
+            document.getElementById('toggleClient').classList.toggle('active', mode === 'client');
+            if (mode === 'client') clearSelection();
+        }
+
+        function exportROIData() {
+            var data = window.TPA_SAVINGS_DETAIL || [];
+            var csv = 'Claim ID,Procedure,TPA Cost,DR Cost,Savings,Category,Date\n';
+            data.forEach(function(r) {
+                csv += [r.claimId, '"'+r.procedureDesc+'"', r.tpaCost, r.drCost, r.savings, r.savingsCategory, r.dateSaved].join(',') + '\n';
+            });
+            var blob = new Blob([csv], {type:'text/csv'});
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'roi-attribution-data.csv';
+            a.click();
+        }
+    </script>
+    <div id="savingsTipBox" style="display:none; position:fixed; max-width:310px; background:var(--primary-navy); color:white; padding:1rem 1.1rem; border-radius:8px; font-size:0.76rem; line-height:1.7; z-index:9999; box-shadow:0 6px 24px rgba(0,0,0,0.3); pointer-events:none;">
+        <strong style="display:block; margin-bottom:0.4rem; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em;">Attributed Savings</strong>
+        Cost reductions directly linked to program interventions rather than market trends or random chance. The delta between the Expected Cost (what would have been spent without the carve-out) and the Actual Cost, validated by isolating specific steered cases or avoided procedures.
+    </div>
+</body>
+</html>
