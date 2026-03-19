@@ -10,7 +10,7 @@ const VIEW_CONFIG = {
 
         nav: [
             { id: 'patients',  label: '{org}', mode: 'patients',  isHome: true },
-            { id: 'analytics', label: 'Analytics',   href: 'analytics.html' },
+            { id: 'analytics', label: 'Reports',   href: 'analytics.html' },
             { id: 'messages',  label: 'Messages',    href: '#.html' }
         ],
 
@@ -67,7 +67,7 @@ const VIEW_CONFIG = {
 
         nav: [
             { id: 'entities',  label: '{org}', mode: 'entities', isHome: true },
-            { id: 'analytics', label: 'Analytics',  href: 'analytics.html' },
+            { id: 'analytics', label: 'Reports',  href: 'analytics.html' },
             { id: 'messages',  label: 'Messages',   href: '#.html' }
         ],
 
@@ -104,7 +104,8 @@ const VIEW_CONFIG = {
 
         nav: [
             { id: 'clients',   label: '{org}', mode: 'clients', isHome: true },
-            { id: 'analytics', label: 'Analytics',  href: 'analytics.html' },
+            { id: 'analytics', label: 'Reports',  href: 'analytics.html' },
+            { id: 'sales',     label: 'Sales Engine', href: 'sales-engine.html' },
             { id: 'messages',  label: 'Messages',   href: '#.html' }
         ],
 
@@ -142,7 +143,7 @@ const VIEW_CONFIG = {
 
         nav: [
             { id: 'projects',  label: '{org}', mode: 'projects', isHome: true },
-            { id: 'analytics', label: 'Analytics',   href: 'analytics.html' },
+            { id: 'analytics', label: 'Reports',   href: 'analytics.html' },
             { id: 'messages',  label: 'Messages',    href: '#.html' }
         ],
 
@@ -221,6 +222,4 @@ const REPORT_REGISTRY = {
     res3: { name: 'Data Completeness Report',         cat: 'DATA QUALITY',      desc: 'Missing fields, incomplete records, and data quality scores by dataset.', audiences: ['researcher'] },
     res4: { name: 'IRB & Compliance Status',          cat: 'DATA QUALITY',      desc: 'Institutional review board approvals, expiration dates, and renewal status.', audiences: ['researcher'] },
 
-    /* Shared Reports */
-    adhoc: { name: 'Ad Hoc Report Builder', cat: '_adhoc', desc: 'Build custom queries and visualizations from any data in the network.', audiences: ['msk_physician', 'dr_admin', 'tpa', 'researcher'] }
 };

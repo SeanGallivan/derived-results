@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Derived Results | Sales Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+.logo-area { text-decoration: none; }
+
+/* Tab Sidebar */
+.se-tab-item { display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid #f0f0f0; padding: 0.75rem 1.2rem; font-family: 'Montserrat'; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background 0.15s; }
+.se-tab-item:hover { background: #f4f7f6; color: var(--primary-navy); }
+.se-tab-item.active { background: var(--primary-navy); color: white; font-weight: 800; }
+.se-tab-item.locked { opacity: 0.4; cursor: not-allowed; }
+.se-tab-item.locked:hover { background: none; color: var(--text-muted); }
+.se-tab-icon { font-size: 1.1rem; width: 24px; text-align: center; flex-shrink: 0; }
+.se-lock-badge { font-size: 0.7rem; margin-left: auto; }
+
+/* Sub-tabs (Acquisition/Retention) */
+.se-sub-tabs { display: flex; gap: 0; border: 2px solid var(--primary-navy); border-radius: 6px; overflow: hidden; margin-bottom: 1rem; display: inline-flex; }
+.se-sub-tab { padding: 6px 18px; font-size: 0.75rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Montserrat'; background: white; color: var(--primary-navy); transition: 0.15s; }
+.se-sub-tab.active { background: var(--primary-navy); color: white; }
+
+/* Heat Table */
+.se-heat-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.se-heat-table th { text-align: left; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #999; padding: 0.5rem 0.6rem; border-bottom: 2px solid #eee; }
+.se-heat-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid #f5f5f5; font-weight: 600; }
+.se-heat-table tr { cursor: pointer; transition: background 0.1s; }
+.se-heat-table tr:hover { background: #f0f4f8; }
+.se-heat-cell { width: 6px; padding: 0 !important; }
+.se-heat-red { background: var(--secondary-red); }
+.se-heat-amber { background: #cc8800; }
+.se-heat-green { background: #0a8f2c; }
+.se-heat-table .se-btn { white-space: nowrap; }
+
+/* Discovery page styles */
+.se-guide-rail { margin-bottom:1.2rem; padding:1rem 1.2rem; border-radius:8px; border-left:4px solid var(--primary-navy); font-size:0.78rem; font-weight:600; line-height:1.7; }
+.se-guide-acquisition { background: linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%); color: #444; }
+.se-guide-retention { background: linear-gradient(135deg, #e6f4ea 0%, #d4edda 100%); color: #2d5a3d; border-left-color: #0a8f2c; }
+.se-six-pack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem; }
+.se-metric { background: #f8f9fb; border: 1px solid #e8eaed; border-radius: 8px; padding: 1rem; text-align: center; transition: border-color 0.2s; }
+.se-metric.green-glow { border-color: #0a8f2c; background: #f0faf2; }
+.se-metric-label { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #999; margin-bottom: 0.3rem; }
+.se-metric-value { font-size: 1.8rem; font-weight: 900; color: var(--primary-navy); line-height: 1; }
+.se-metric-value.green { color: #0a8f2c; }
+.se-metric-value.red { color: var(--secondary-red); }
+.se-metric-value.amber { color: #cc8800; }
+.se-metric-sub { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.25rem; }
+.se-breakdown-locked { text-align:center; padding:2rem; background:#f8f9fb; border:2px dashed #ddd; border-radius:8px; margin-bottom:1.5rem; }
+.se-breakdown-locked p { font-size:0.82rem; color:var(--text-muted); margin:0.5rem 0 0; }
+.se-strategy-card { background: #f0faf2; border: 2px solid #0a8f2c; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.se-strategy-card h4 { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #0a8f2c; margin: 0 0 0.8rem; }
+.se-strategy-note { margin-top:1rem; padding:0.8rem 1rem; background:#fef7e0; border-left:3px solid #cc8800; border-radius:4px; font-size:0.72rem; color:#7a6200; line-height:1.6; }
+.se-heat-table tr.at-risk-row { background: #fff5f5; }
+.se-heat-table tr.at-risk-row:hover { background: #fde8e8; }
+.se-heat-table tr.at-risk-row td:nth-child(2) { font-weight: 800; }
+.se-th-tip { position: relative; cursor: help; border-bottom: 1px dashed #999; }
+.se-th-tip:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; background: var(--primary-navy); color: white; font-size: 0.58rem; font-weight: 600; text-transform: none; letter-spacing: 0; padding: 6px 10px; border-radius: 4px; white-space: nowrap; z-index: 10; margin-top: 4px; }
+
+/* Status Flags */
+.se-flag { display: inline-block; font-size: 0.58rem; font-weight: 800; padding: 2px 6px; border-radius: 3px; white-space: nowrap; margin-right: 3px; }
+.se-flag-red { background: #fde8e8; color: var(--secondary-red); }
+.se-flag-amber { background: #fef7e0; color: #b8860b; }
+.se-flag-green { background: #e6f4ea; color: #0a8f2c; }
+.se-flag-blue { background: #dbeafe; color: var(--primary-navy); }
+
+/* Metric Cards */
+.se-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.se-card { background: #f8f9fb; border: 1px solid #e8eaed; border-radius: 8px; padding: 1.2rem; text-align: center; }
+.se-card-label { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #999; margin-bottom: 0.4rem; }
+.se-card-value { font-size: 2rem; font-weight: 900; color: var(--primary-navy); line-height: 1; }
+.se-card-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem; }
+.se-card-value.red { color: var(--secondary-red); }
+.se-card-value.green { color: #0a8f2c; }
+
+/* Stepper */
+.se-stepper { display: flex; align-items: center; justify-content: center; gap: 0; margin: 2rem 0; }
+.se-step { display: flex; flex-direction: column; align-items: center; position: relative; min-width: 140px; }
+.se-step-circle { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: #999; background: white; z-index: 1; transition: all 0.3s; }
+.se-step.complete .se-step-circle { border-color: #0a8f2c; background: #0a8f2c; color: white; }
+.se-step.active .se-step-circle { border-color: var(--primary-navy); background: var(--primary-navy); color: white; animation: pulse 1.5s infinite; }
+.se-step-label { font-size: 0.65rem; font-weight: 700; color: #999; margin-top: 0.5rem; text-align: center; max-width: 120px; }
+.se-step.complete .se-step-label { color: #0a8f2c; }
+.se-step.active .se-step-label { color: var(--primary-navy); }
+.se-step-line { width: 60px; height: 3px; background: #ddd; margin-bottom: 1.5rem; }
+.se-step-line.complete { background: #0a8f2c; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,45,114,0.3); } 50% { box-shadow: 0 0 0 8px rgba(0,45,114,0); } }
+
+/* Comparison Table (Normalization) */
+.se-compare-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.se-compare-table th { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; color: #999; padding: 0.6rem 0.8rem; border-bottom: 2px solid #eee; text-align: right; }
+.se-compare-table th:first-child { text-align: left; }
+.se-compare-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f0f0f0; font-weight: 600; text-align: right; }
+.se-compare-table td:first-child { text-align: left; color: var(--primary-navy); font-weight: 700; }
+.se-compare-table tr.total-row { border-top: 3px solid var(--primary-navy); }
+.se-compare-table tr.total-row td { font-weight: 900; font-size: 0.9rem; padding-top: 0.8rem; }
+.se-compare-table input[type="number"] { width: 90px; padding: 4px 6px; border: 2px solid var(--primary-navy); border-radius: 4px; font-family: 'Montserrat'; font-size: 0.82rem; font-weight: 700; text-align: right; }
+.se-delta-pos { color: #0a8f2c; }
+.se-delta-neg { color: var(--secondary-red); }
+
+/* Document Checklist */
+.se-doc-row { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-bottom: 1px solid #f0f0f0; }
+.se-doc-row:last-child { border-bottom: none; }
+.se-doc-name { flex: 1; font-size: 0.82rem; font-weight: 700; color: var(--primary-navy); }
+.se-doc-status { font-size: 0.6rem; font-weight: 800; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+.se-toggle-wrap { display: flex; align-items: center; gap: 0.4rem; font-size: 0.6rem; font-weight: 700; color: #999; }
+.se-toggle { position: relative; width: 36px; height: 20px; }
+.se-toggle input { opacity: 0; width: 0; height: 0; }
+.se-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ddd; border-radius: 20px; transition: 0.2s; }
+.se-toggle-slider:before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+.se-toggle input:checked + .se-toggle-slider { background: #0a8f2c; }
+.se-toggle input:checked + .se-toggle-slider:before { transform: translateX(16px); }
+.se-toggle.legal-toggle input:checked + .se-toggle-slider { background: var(--primary-navy); }
+.se-doc-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; padding: 0.4rem 1rem 0; }
+.se-doc-info { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #e8eaed; color: #666; font-size: 0.55rem; font-weight: 900; cursor: help; flex-shrink: 0; position: relative; }
+.se-doc-info:hover::after { content: attr(data-info); position: absolute; left: 24px; top: -4px; background: var(--primary-navy); color: white; font-size: 0.62rem; font-weight: 600; padding: 8px 12px; border-radius: 6px; white-space: normal; width: 280px; z-index: 10; line-height: 1.5; }
+.se-asa-toggle { cursor: pointer; user-select: none; }
+.se-asa-toggle:hover { background: #f0f4f8; }
+.se-asa-content { overflow: hidden; transition: max-height 0.3s ease; }
+.se-asa-content.collapsed { max-height: 0; padding: 0; }
+.se-asa-arrow { transition: transform 0.2s; display: inline-block; }
+.se-asa-arrow.open { transform: rotate(90deg); }
+.se-contract-badge { display: inline-block; font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 3px; background: #dbeafe; color: var(--primary-navy); margin-left: 0.5rem; vertical-align: middle; }
+.se-ready-btn { background: linear-gradient(135deg, #0a8f2c 0%, #067a24 100%); color: white; border: none; padding: 10px 24px; font-size: 0.85rem; font-weight: 800; animation: readyPulse 2s infinite; }
+@keyframes readyPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(10,143,44,0.3); } 50% { box-shadow: 0 0 0 8px rgba(10,143,44,0); } }
+
+/* Data Bridge enhancements */
+.se-step-sub { font-size: 0.55rem; color: #aaa; margin-top: 0.2rem; max-width: 130px; text-align: center; line-height: 1.3; }
+.se-step.complete .se-step-sub { color: #6dbf7b; }
+.se-step.active .se-step-sub { color: var(--primary-navy); opacity: 0.7; }
+.se-hipaa-badge { display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; padding: 0.6rem 1rem; background: #f8f9fb; border: 1px solid #e8eaed; border-radius: 6px; font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
+.se-share-link-box { display: flex; align-items: center; gap: 0.5rem; background: white; border: 2px solid var(--primary-navy); border-radius: 8px; padding: 0.5rem 0.8rem; max-width: 500px; margin: 0 auto; }
+.se-share-link-url { flex: 1; font-family: 'Courier New', monospace; font-size: 0.7rem; color: var(--primary-navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.se-sim-tip { position: relative; }
+.se-sim-tip:hover::after { content: 'Use this to advance the state for demo purposes without a live employer authentication.'; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--primary-navy); color: white; font-size: 0.6rem; font-weight: 600; padding: 6px 10px; border-radius: 4px; white-space: normal; width: 220px; text-align: center; margin-bottom: 6px; z-index: 10; }
+
+/* Sidebar ready badge */
+.se-tab-ready { font-size: 0.5rem; font-weight: 800; background: #0a8f2c; color: white; padding: 1px 5px; border-radius: 3px; margin-left: auto; text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* Kanban */
+.se-kanban { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.se-kanban-col { background: #f8f9fb; border-radius: 8px; padding: 0.8rem; min-height: 200px; }
+.se-kanban-title { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #999; letter-spacing: 0.05em; margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 2px solid #e8eaed; }
+.se-ms-card { background: white; border: 1px solid #e8eaed; border-radius: 6px; padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; }
+.se-ms-task { font-size: 0.78rem; font-weight: 700; color: var(--primary-navy); margin-bottom: 0.3rem; }
+.se-ms-meta { font-size: 0.6rem; color: #999; font-weight: 600; }
+.se-ms-desc { font-size: 0.6rem; color: #aaa; line-height: 1.4; margin-top: 0.2rem; font-style: italic; }
+.se-ms-card.delayed { border-left: 3px solid var(--secondary-red); }
+.se-ms-card.guarantee { border-left: 3px solid #0a8f2c; background: #f0faf2; }
+.se-flow-context { text-align: center; font-size: 0.68rem; color: var(--text-muted); line-height: 1.6; margin-top: 0.8rem; padding: 0.6rem 1rem; background: #f8f9fb; border-radius: 6px; }
+.se-disruption-action { font-size: 0.6rem; font-weight: 700; color: var(--primary-navy); cursor: pointer; border: 1px solid var(--primary-navy); padding: 2px 8px; border-radius: 3px; background: white; font-family: 'Montserrat'; }
+.se-disruption-action:hover { background: var(--primary-navy); color: white; }
+.se-hr-toggle { display: inline-flex; gap: 0; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-left: auto; }
+.se-hr-btn { padding: 3px 10px; font-size: 0.62rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Montserrat'; background: white; color: var(--text-muted); }
+.se-hr-btn.active { background: var(--primary-navy); color: white; }
+
+/* 90-Day Command Center */
+.se-hero-card .se-hero-info { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.25); color: white; font-size: 0.5rem; font-weight: 900; text-align: center; line-height: 14px; cursor: help; position: relative; margin-left: 0.3rem; vertical-align: middle; }
+.se-hero-card .se-hero-info:hover::after { content: attr(data-tip); position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; font-size: 0.58rem; font-weight: 600; padding: 8px 10px; border-radius: 6px; white-space: normal; width: 240px; text-align: left; margin-bottom: 6px; z-index: 10; line-height: 1.5; }
+.se-progress-desc { font-size: 0.6rem; color: #aaa; font-style: italic; margin-top: -0.4rem; margin-bottom: 0.6rem; padding-left: 188px; }
+.se-progress-fill.critical { background: var(--secondary-red) !important; }
+.se-override-btn { font-size: 0.58rem; font-weight: 700; color: var(--secondary-red); cursor: pointer; border: 1px solid var(--secondary-red); padding: 2px 8px; border-radius: 3px; background: white; font-family: 'Montserrat'; margin-left: 0.5rem; }
+.se-override-btn:hover { background: var(--secondary-red); color: white; }
+@media (max-width: 768px) { .se-hero { grid-template-columns: 1fr; } }
+@keyframes verifiedPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+.reconciliation-badge { animation: verifiedPulse 3s infinite; }
+
+/* Money Path Flowchart */
+.se-flowchart { display: flex; align-items: center; justify-content: center; gap: 0; margin: 1.5rem 0; }
+.se-flow-node { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 1rem 1.5rem; border: 2px solid var(--primary-navy); border-radius: 10px; background: white; min-width: 160px; text-align: center; position: relative; }
+.se-flow-node.validated { border-color: #0a8f2c; }
+.se-flow-label { font-size: 0.72rem; font-weight: 800; color: var(--primary-navy); }
+.se-flow-check { font-size: 1rem; color: #0a8f2c; }
+.se-flow-arrow { font-size: 1.5rem; color: var(--primary-navy); padding: 0 0.5rem; font-weight: 900; }
+
+/* Progress Bars */
+.se-progress-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+.se-progress-label { width: 180px; font-size: 0.72rem; font-weight: 700; color: var(--primary-navy); flex-shrink: 0; }
+.se-progress-track { flex: 1; height: 18px; background: #f0f0f0; border-radius: 9px; overflow: hidden; }
+.se-progress-fill { height: 100%; border-radius: 9px; transition: width 0.3s; }
+.se-progress-pct { width: 45px; font-size: 0.75rem; font-weight: 800; text-align: right; }
+
+/* Hero cards for 90-day */
+.se-hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.se-hero-card { background: var(--primary-navy); color: white; border-radius: 8px; padding: 1.2rem; text-align: center; }
+.se-hero-card.accent { background: #0a8f2c; }
+.se-hero-card.warn { background: var(--secondary-red); }
+.se-hero-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+.se-hero-value { font-size: 2.2rem; font-weight: 900; margin-top: 0.3rem; }
+
+/* Empty State */
+.se-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; color: var(--text-muted); text-align: center; }
+.se-empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.se-empty h3 { color: var(--primary-navy); margin: 0 0 0.5rem; }
+.se-empty p { font-size: 0.85rem; max-width: 400px; line-height: 1.6; }
+
+/* Toast */
+.se-toast { position: fixed; bottom: 2rem; right: 2rem; background: #0a8f2c; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; font-family: 'Montserrat'; font-size: 0.82rem; font-weight: 700; z-index: 9999; opacity: 0; transform: translateY(20px); transition: all 0.3s; pointer-events: none; }
+.se-toast.show { opacity: 1; transform: translateY(0); }
+
+/* Buttons */
+.se-btn { padding: 8px 18px; border: none; border-radius: 6px; font-family: 'Montserrat'; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.15s; }
+.se-btn-primary { background: var(--primary-navy); color: white; }
+.se-btn-primary:hover { opacity: 0.9; }
+.se-btn-outline { background: white; color: var(--primary-navy); border: 2px solid var(--primary-navy); }
+.se-btn-outline:hover { background: var(--primary-navy); color: white; }
+.se-btn-disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Filter Row */
+.se-filter-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.se-filter-row select, .se-filter-row input { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; font-family: 'Montserrat'; font-size: 0.78rem; font-weight: 600; }
+.se-filter-row select { min-width: 200px; }
+.se-filter-row input { flex: 1; max-width: 300px; }
+
+/* Side-by-side panels (Fiduciary) */
+.se-sidebyside { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.se-panel { background: #f8f9fb; border: 1px solid #e8eaed; border-radius: 8px; padding: 1rem; }
+.se-panel h4 { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #999; margin: 0 0 0.6rem; }
+.se-panel-body { font-size: 0.78rem; color: #555; line-height: 1.7; }
+
+/* Section headers inside content */
+.se-section-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--primary-navy); letter-spacing: 0.04em; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-navy); margin: 1.5rem 0 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-brand">
+            <a class="logo-area" href="./selector.html" data-branding="org-name">Derived Results</a>
+            <span class="powered-badge">Powered by <strong>Derived Results</strong></span>
+        </div>
+        <nav id="topNav"></nav>
+        <div class="reconciliation-badge">&#x2713; Verified against <span data-branding="org-name">Derived Results</span> Claims System</div>
+    </header>
+    <div class="wrapper">
+        <aside class="sidebar" style="padding-top:0;">
+            <div id="seTabList" style="padding:0;"></div>
+        </aside>
+        <main id="mainContent">
+            <div class="detail-header">
+                <div><h2 style="margin:0;" id="seTitle">Portfolio Navigator</h2>
+                <div style="font-size:0.9rem; opacity:0.8; margin-top:4px;" id="seSub">Strategic Sales Command Center</div></div>
+            </div>
+            <div id="seBody" class="view-section" style="background:white; padding-top:1.5rem; flex:1; overflow-y:auto;"></div>
+        </main>
+    </div>
+    <!-- Toast notification -->
+    <div id="seToast" class="se-toast"></div>
+
+    <script src="./mock-data.js"></script>
+    <script src="./mock-data-sales.js"></script>
+    <script src="./view-config.js"></script>
+    <script src="./router.js"></script>
+    <script src="./branding.js"></script>
+    <script>
+/* \u2500\u2500 State \u2500\u2500 */
+var SALES_STATE = {
+    activeTab: 'hub',
+    selectedBroker: null,
+    selectedGroup: null,
+    dataBridgeComplete: false,
+    hubFilter: 'acquisition',
+    statusFilter: ''
+};
+
+var SE_TABS = [
+    { id: 'hub',            label: 'Portfolio Navigator',  icon: '&#x1F525;', sub: 'Strategic Sales Command Center' },
+    { id: 'discovery',      label: 'Discovery Detail',     icon: '&#x1F50D;', sub: '5500 Deep-Dive', subRetention: 'Client Value Dashboard' },
+    { id: 'databridge',     label: 'Data Bridge',          icon: '&#x1F517;', sub: 'Claims Data Extraction' },
+    { id: 'normalization',  label: 'Normalization Engine',  icon: '&#x2696;',  sub: 'The Truth Table' },
+    { id: 'fiduciary',      label: 'Fiduciary Shield',     icon: '&#x1F6E1;', sub: 'Compliance & Disclosure Kit' },
+    { id: 'implementation', label: 'Implementation Twin',  icon: '&#x1F3D7;', sub: 'Digital Implementation Tracker' },
+    { id: 'command',        label: '90-Day Command',       icon: '&#x1F4CA;', sub: 'Post-Launch Performance' }
+];
+
+/* \u2500\u2500 Utilities \u2500\u2500 */
+function showToast(msg) {
+    var el = document.getElementById('seToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function fmt(n) {
+    return '$' + Number(n).toLocaleString();
+}
+
+function fmtPEPY(n) {
+    return '$' + Number(n).toLocaleString();
+}
+
+function getAllGroups() {
+    var groups = [];
+    SALES_BROKERS.forEach(function(b) {
+        b.groups.forEach(function(g) {
+            groups.push({ broker: b, group: g });
+        });
+    });
+    return groups;
+}
+
+function getGroupFlags(g) {
+    var flags = [];
+    if (g.carrier === 'BUCA' && g.pepyDelta > 15) flags.push({ label: 'Statistically Overpaying', cls: 'se-flag-red' });
+    if (g.type === 'retention' && g.lives >= 100 && !g.hasAudit) flags.push({ label: 'Audit Cliff Warning', cls: 'se-flag-amber' });
+    if (g.daysToRenewal <= 270) flags.push({ label: 'Due for Move', cls: 'se-flag-green' });
+    return flags;
+}
+
+function getHeatColor(g) {
+    if (g.carrier === 'BUCA' && g.pepyDelta > 15) return 'se-heat-red';
+    if (g.type === 'retention' && g.lives >= 100 && !g.hasAudit) return 'se-heat-amber';
+    if (g.daysToRenewal <= 270) return 'se-heat-amber';
+    return 'se-heat-green';
+}
+
+/* \u2500\u2500 Tab Sidebar \u2500\u2500 */
+function buildSETabSidebar() {
+    var el = document.getElementById('seTabList');
+    var html = '';
+    var hasGroup = !!SALES_STATE.selectedGroup;
+    SE_TABS.forEach(function(t) {
+        var isLocked = false;
+        var lockTitle = '';
+        if (t.id === 'normalization') {
+            isLocked = !hasGroup || !SALES_STATE.dataBridgeComplete;
+            lockTitle = !hasGroup ? 'Select a group first' : 'Complete Data Bridge to unlock';
+        } else if (t.id === 'databridge' || t.id === 'fiduciary' || t.id === 'implementation' || t.id === 'command') {
+            isLocked = !hasGroup;
+            lockTitle = 'Select a group from Portfolio Navigator';
+        }
+        var cls = 'se-tab-item' + (t.id === SALES_STATE.activeTab ? ' active' : '') + (isLocked ? ' locked' : '');
+        html += '<button class="' + cls + '" ' +
+            (isLocked ? 'disabled title="' + lockTitle + '"' : 'onclick="selectSETab(\'' + t.id + '\')"') +
+            '><span class="se-tab-icon">' + t.icon + '</span>' + t.label;
+        // Ready badge for discovery/normalization when Data Bridge is complete
+        var readyBadge = '';
+        if (!isLocked && SALES_STATE.dataBridgeComplete && (t.id === 'discovery' || t.id === 'normalization')) {
+            readyBadge = '<span class="se-tab-ready">Ready</span>';
+        }
+        html += (isLocked ? ' <span class="se-lock-badge">&#x1F512;</span>' : readyBadge) +
+            '</button>';
+    });
+    el.innerHTML = html;
+}
+
+function selectSETab(tabId) {
+    SALES_STATE.activeTab = tabId;
+    buildSETabSidebar();
+    var tab = SE_TABS.find(function(t) { return t.id === tabId; });
+    document.getElementById('seTitle').textContent = tab.label;
+    var subText = tab.sub;
+    if (tabId === 'discovery' && SALES_STATE.selectedGroup && SALES_STATE.selectedGroup.type === 'retention') {
+        subText = tab.subRetention || tab.sub;
+    }
+    document.getElementById('seSub').textContent = subText;
+    var renderers = {
+        hub: renderHub,
+        discovery: renderDiscovery,
+        databridge: renderDataBridge,
+        normalization: renderNormalization,
+        fiduciary: renderFiduciary,
+        implementation: renderImplementation,
+        command: renderCommand
+    };
+    if (renderers[tabId]) renderers[tabId]();
+}
+
+/* ── Component 0: Portfolio Navigator ── */
+function renderHub() {
+    var body = document.getElementById('seBody');
+    var filter = SALES_STATE.hubFilter;
+
+    // Sub-tabs
+    var html = '<div class="se-sub-tabs">' +
+        '<button class="se-sub-tab' + (filter === 'acquisition' ? ' active' : '') + '" onclick="SALES_STATE.hubFilter=\'acquisition\'; SALES_STATE.statusFilter=\'\'; renderHub();">Acquisition</button>' +
+        '<button class="se-sub-tab' + (filter === 'retention' ? ' active' : '') + '" onclick="SALES_STATE.hubFilter=\'retention\'; SALES_STATE.statusFilter=\'\'; renderHub();">Retention</button>' +
+        '</div>';
+
+    // Context header — different text per tab
+    if (filter === 'retention') {
+        html += '<div style="margin-bottom:1.2rem; padding:1rem 1.2rem; background:linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%); border-radius:8px; border-left:4px solid var(--primary-navy);">' +
+            '<div style="font-size:0.78rem; font-weight:600; color:#444; line-height:1.7;">' +
+            'Welcome to your <strong style="color:var(--primary-navy);">Retention Command Center</strong>. ' +
+            'This view is designed to help you protect your block of business by monitoring real-time plan performance. ' +
+            'Use the <strong>Retention Status</strong> indicators to proactively address &ldquo;At Risk&rdquo; accounts ' +
+            '(high grievances or low accuracy) and manage 5500 compliance alerts, such as the ' +
+            '<strong>Audit Cliff</strong> for groups approaching 100 participants.' +
+            '</div></div>';
+    } else {
+        html += '<div style="margin-bottom:1.2rem; padding:1rem 1.2rem; background:linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%); border-radius:8px; border-left:4px solid var(--primary-navy);">' +
+            '<div style="font-size:0.78rem; font-weight:600; color:#444; line-height:1.7;">' +
+            'Welcome to your <strong style="color:var(--primary-navy);">Strategic Command Center</strong>. ' +
+            'Use this page to identify <strong>Net New</strong> acquisition targets using public 5500 data ' +
+            '(groups &gt;15% overpaying or due for a 9-month renewal move) and protect your ' +
+            '<strong>Retention</strong> block by monitoring &ldquo;Audit Cliff&rdquo; alerts and member ' +
+            'satisfaction markers. Select a group to begin the automated proposal and implementation flow.' +
+            '</div></div>';
+    }
+
+    // Broker filter + search + status filter
+    html += '<div class="se-filter-row">' +
+        '<select id="seBrokerFilter" onchange="SALES_STATE.selectedBroker=this.value; renderHub();">' +
+        '<option value="">All Brokers</option>';
+    SALES_BROKERS.forEach(function(b) {
+        var sel = SALES_STATE.selectedBroker === b.id ? ' selected' : '';
+        html += '<option value="' + b.id + '"' + sel + '>' + b.name + ' \u2014 ' + b.firm + '</option>';
+    });
+    html += '</select>' +
+        '<input type="text" id="seGroupSearch" placeholder="Search groups..." oninput="filterHubTable(this.value)">';
+
+    // Status filter options differ by tab
+    if (filter === 'retention') {
+        html += '<select id="seStatusFilter" onchange="SALES_STATE.statusFilter=this.value; renderHub();">' +
+            '<option value="">All Statuses</option>' +
+            '<option value="atrisk"' + (SALES_STATE.statusFilter === 'atrisk' ? ' selected' : '') + '>At Risk</option>' +
+            '<option value="audit"' + (SALES_STATE.statusFilter === 'audit' ? ' selected' : '') + '>Audit Cliff Warning</option>' +
+            '<option value="move"' + (SALES_STATE.statusFilter === 'move' ? ' selected' : '') + '>Due for Move</option>' +
+            '<option value="stable"' + (SALES_STATE.statusFilter === 'stable' ? ' selected' : '') + '>Stable</option>' +
+            '</select>';
+    } else {
+        html += '<select id="seStatusFilter" onchange="SALES_STATE.statusFilter=this.value; renderHub();">' +
+            '<option value="">All Statuses</option>' +
+            '<option value="overpaying"' + (SALES_STATE.statusFilter === 'overpaying' ? ' selected' : '') + '>Statistically Overpaying</option>' +
+            '<option value="audit"' + (SALES_STATE.statusFilter === 'audit' ? ' selected' : '') + '>Audit Cliff Warning</option>' +
+            '<option value="move"' + (SALES_STATE.statusFilter === 'move' ? ' selected' : '') + '>Due for Move</option>' +
+            '</select>';
+    }
+    html += '</div>';
+
+    // Get filtered groups
+    var all = getAllGroups();
+    var filtered;
+    if (filter === 'retention') {
+        // Retention tab shows ALL groups (entire book of business)
+        filtered = all.filter(function(item) {
+            if (SALES_STATE.selectedBroker && item.broker.id !== SALES_STATE.selectedBroker) return false;
+            return true;
+        });
+    } else {
+        // Acquisition tab only shows acquisition prospects
+        filtered = all.filter(function(item) {
+            if (item.group.type !== 'acquisition') return false;
+            if (SALES_STATE.selectedBroker && item.broker.id !== SALES_STATE.selectedBroker) return false;
+            return true;
+        });
+    }
+
+    // Status filter
+    if (SALES_STATE.statusFilter) {
+        filtered = filtered.filter(function(item) {
+            var g = item.group;
+            if (filter === 'retention') {
+                var rStatus = getRetentionStatus(g);
+                var badges = getRetentionBadges(g);
+                var allLabels = badges.map(function(b) { return b.label; });
+                if (SALES_STATE.statusFilter === 'atrisk') return rStatus === 'At Risk';
+                if (SALES_STATE.statusFilter === 'audit') return allLabels.indexOf('Audit Cliff Warning') >= 0;
+                if (SALES_STATE.statusFilter === 'move') return allLabels.indexOf('Due for Move') >= 0;
+                if (SALES_STATE.statusFilter === 'stable') return rStatus === 'Stable';
+            } else {
+                var flags = getGroupFlags(g);
+                var flagLabels = flags.map(function(f) { return f.label; });
+                if (SALES_STATE.statusFilter === 'overpaying') return flagLabels.indexOf('Statistically Overpaying') >= 0;
+                if (SALES_STATE.statusFilter === 'audit') return flagLabels.indexOf('Audit Cliff Warning') >= 0;
+                if (SALES_STATE.statusFilter === 'move') return flagLabels.indexOf('Due for Move') >= 0;
+            }
+            return true;
+        });
+    }
+
+    if (filtered.length === 0) {
+        html += '<div class="se-empty"><div class="se-empty-icon">&#x1F50D;</div><h3>No ' +
+            (filter === 'acquisition' ? 'Prospects' : 'Accounts') + ' Found</h3>' +
+            '<p>' + (SALES_STATE.selectedBroker ? 'No matching groups for this broker and filter combination.' : 'Select a Broker to map their Block of Business.') + '</p></div>';
+        body.innerHTML = html;
+        return;
+    }
+
+    // Sort: retention defaults by renewal date ascending
+    if (filter === 'retention') {
+        filtered.sort(function(a, b) { return a.group.daysToRenewal - b.group.daysToRenewal; });
+    }
+
+    // Summary stats
+    var totalLives = filtered.reduce(function(s, i) { return s + i.group.lives; }, 0);
+    if (filter === 'retention') {
+        var atRiskCount = filtered.filter(function(i) { return getRetentionStatus(i.group) === 'At Risk'; }).length;
+        html += '<div style="display:flex; gap:1.5rem; margin-bottom:1rem; font-size:0.72rem; font-weight:700; color:var(--text-muted);">' +
+            '<span>' + filtered.length + ' Accounts</span>' +
+            '<span>' + totalLives.toLocaleString() + ' Total Participants</span>' +
+            '<span style="color:var(--secondary-red);">' + atRiskCount + ' At Risk</span>' +
+            '<span>Sorted by Renewal Date &#x2191;</span></div>';
+    } else {
+        var avgDelta = (filtered.reduce(function(s, i) { return s + i.group.pepyDelta; }, 0) / filtered.length).toFixed(1);
+        html += '<div style="display:flex; gap:1.5rem; margin-bottom:1rem; font-size:0.72rem; font-weight:700; color:var(--text-muted);">' +
+            '<span>' + filtered.length + ' Groups</span>' +
+            '<span>' + totalLives.toLocaleString() + ' Total Participants</span>' +
+            '<span>Avg PEPY Delta: ' + avgDelta + '%</span></div>';
+    }
+
+    if (filter === 'retention') {
+        // ─── RETENTION TABLE ───
+        html += '<table class="se-heat-table" id="seHubTable"><thead><tr>' +
+            '<th class="se-heat-cell"></th>' +
+            '<th>Group</th>' +
+            '<th>Broker</th>' +
+            '<th>Participants</th>' +
+            '<th><span class="se-th-tip" data-tip="Total plan spend divided by participants (annual)">Current PEPY</span></th>' +
+            '<th><span class="se-th-tip" data-tip="Real-time claims adjudication accuracy rate">Claims Accuracy (%)</span></th>' +
+            '<th>Member Grievances</th>' +
+            '<th>Renewal Date</th>' +
+            '<th>Retention Status</th>' +
+            '<th>Action</th></tr></thead><tbody>';
+
+        filtered.forEach(function(item) {
+            var g = item.group;
+            var b = item.broker;
+
+            var rStatus = getRetentionStatus(g);
+            var isAtRisk = rStatus === 'At Risk';
+            var rowCls = isAtRisk ? ' class="at-risk-row"' : '';
+
+            // Heat color based on retention status
+            var heat = isAtRisk ? 'se-heat-red' : (g.daysToRenewal <= 270 ? 'se-heat-amber' : 'se-heat-green');
+
+            // Claims accuracy styling
+            var accVal = g.claimsAccuracy !== undefined ? g.claimsAccuracy : 0;
+            var accColor = accVal < 97 ? 'var(--secondary-red)' : '#0a8f2c';
+            var accDisplay = accVal ? accVal.toFixed(1) + '%' : 'N/A';
+
+            // Grievances styling
+            var grvVal = g.memberGrievances !== undefined ? g.memberGrievances : 0;
+            var grvColor = grvVal > 5 ? 'var(--secondary-red)' : 'var(--text-muted)';
+            var grvWeight = grvVal > 5 ? '800' : '600';
+
+            // Build retention status badges
+            var badges = getRetentionBadges(g);
+            var statusHtml = '';
+            if (isAtRisk) {
+                statusHtml += '<span class="se-flag se-flag-red">At Risk</span> ';
+            } else {
+                statusHtml += '<span class="se-flag se-flag-green">Stable</span> ';
+            }
+            badges.forEach(function(bd) {
+                statusHtml += '<span class="se-flag ' + bd.cls + '">' + bd.label + '</span> ';
+            });
+
+            html += '<tr' + rowCls + ' onclick="selectGroup(\'' + b.id + '\', \'' + g.id + '\')">' +
+                '<td class="se-heat-cell ' + heat + '"></td>' +
+                '<td style="color:var(--primary-navy); font-weight:700;">' + g.name + '</td>' +
+                '<td>' + b.name + '</td>' +
+                '<td>' + g.lives + '</td>' +
+                '<td>' + fmtPEPY(g.currentPEPY) + '</td>' +
+                '<td style="color:' + accColor + '; font-weight:700;">' + accDisplay + '</td>' +
+                '<td style="color:' + grvColor + '; font-weight:' + grvWeight + ';">' + grvVal + '</td>' +
+                '<td>' + g.renewalDate + '</td>' +
+                '<td>' + statusHtml + '</td>' +
+                '<td><button class="se-btn se-btn-primary" style="padding:4px 12px; font-size:0.65rem;" onclick="event.stopPropagation(); selectGroup(\'' + b.id + '\', \'' + g.id + '\')">Select &amp; Analyze</button></td>' +
+                '</tr>';
+        });
+        html += '</tbody></table>';
+
+    } else {
+        // ─── ACQUISITION TABLE (unchanged) ───
+        html += '<table class="se-heat-table" id="seHubTable"><thead><tr>' +
+            '<th class="se-heat-cell"></th><th>Group</th><th>Broker</th><th>Participants</th><th>Incumbent</th>' +
+            '<th>Current PEPY</th><th>Benchmark</th><th>Delta</th><th>Renewal</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+
+        filtered.forEach(function(item) {
+            var g = item.group;
+            var b = item.broker;
+            var heat = getHeatColor(g);
+            var flags = getGroupFlags(g);
+            var flagsHtml = flags.map(function(f) { return '<span class="se-flag ' + f.cls + '">' + f.label + '</span>'; }).join('');
+
+            html += '<tr onclick="selectGroup(\'' + b.id + '\', \'' + g.id + '\')">' +
+                '<td class="se-heat-cell ' + heat + '"></td>' +
+                '<td style="color:var(--primary-navy); font-weight:700;">' + g.name + '</td>' +
+                '<td>' + b.name + '</td>' +
+                '<td>' + g.lives + '</td>' +
+                '<td>' + g.incumbent + '</td>' +
+                '<td>' + fmtPEPY(g.currentPEPY) + '</td>' +
+                '<td>' + fmtPEPY(g.benchmarkPEPY) + '</td>' +
+                '<td style="color:' + (g.pepyDelta > 15 ? 'var(--secondary-red)' : '#cc8800') + '; font-weight:800;">+' + g.pepyDelta + '%</td>' +
+                '<td>' + g.renewalDate + '</td>' +
+                '<td>' + flagsHtml + '</td>' +
+                '<td><button class="se-btn se-btn-primary" style="padding:4px 12px; font-size:0.65rem;" onclick="event.stopPropagation(); selectGroup(\'' + b.id + '\', \'' + g.id + '\')">Select &amp; Analyze</button></td>' +
+                '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+
+    body.innerHTML = html;
+}
+
+/* Retention status helpers */
+function getRetentionStatus(g) {
+    var acc = g.claimsAccuracy !== undefined ? g.claimsAccuracy : 100;
+    var grv = g.memberGrievances !== undefined ? g.memberGrievances : 0;
+    if (grv > 5 || acc < 97) return 'At Risk';
+    return 'Stable';
+}
+
+function getRetentionBadges(g) {
+    var badges = [];
+    if (g.lives >= 90 && g.lives <= 110) badges.push({ label: 'Audit Cliff Warning', cls: 'se-flag-amber' });
+    if (g.daysToRenewal <= 270) badges.push({ label: 'Due for Move', cls: 'se-flag-green' });
+    return badges;
+}
+
+function filterHubTable(query) {
+    var rows = document.querySelectorAll('#seHubTable tbody tr');
+    query = query.toLowerCase();
+    rows.forEach(function(row) {
+        var name = row.children[1].textContent.toLowerCase();
+        row.style.display = name.indexOf(query) >= 0 ? '' : 'none';
+    });
+}
+
+function selectGroup(brokerId, groupId) {
+    SALES_STATE.selectedBroker = brokerId;
+    var broker = SALES_BROKERS.find(function(b) { return b.id === brokerId; });
+    SALES_STATE.selectedGroup = broker.groups.find(function(g) { return g.id === groupId; });
+    if (SALES_STATE.selectedGroup.dataBridgeStatus === 'complete') {
+        SALES_STATE.dataBridgeComplete = true;
+    } else {
+        SALES_STATE.dataBridgeComplete = false;
+    }
+    buildSETabSidebar();
+    selectSETab('discovery');
+}
+
+function renderDiscovery() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+
+    if (!g) {
+        body.innerHTML = '<div class="se-empty"><div class="se-empty-icon">&#x1F4CB;</div><h3>No Group Selected</h3><p>Please select a group from the Portfolio Navigator to begin the analysis.</p></div>';
+        return;
+    }
+
+    var isRetention = (g.type === 'retention');
+    var hasBridge = (g.dataBridgeStatus === 'complete');
+
+    // Group header
+    var html = '<div style="margin-bottom:1rem; padding:1rem; background:#f0f4f8; border-radius:8px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+        '<div><div style="font-size:1.1rem; font-weight:800; color:var(--primary-navy);">' + g.name + '</div>' +
+        '<div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.3rem;">' + g.lives + ' Participants &bull; ' + g.industry + ' &bull; ' + g.planType + ' &bull; ' + g.incumbent + '</div></div>' +
+        '<span class="se-flag ' + (isRetention ? 'se-flag-green' : 'se-flag-blue') + '" style="font-size:0.7rem; padding:4px 10px;">' + (isRetention ? 'Existing Client' : 'Prospect') + '</span>' +
+        '</div></div>';
+
+    // ─── Contextual Guide Rail ───
+    if (isRetention) {
+        html += '<div class="se-guide-rail se-guide-retention">' +
+            'You are viewing the <strong>Client Value Dashboard</strong>. ' +
+            'This page highlights our operational performance and fiduciary health over the last 12 months. ' +
+            '<strong>Your Goal:</strong> Review the Renewal Strategy and generate the ' +
+            '&ldquo;Annual Value Report&rdquo; to reinforce our partnership and preempt competitive RFPs.' +
+            '</div>';
+    } else {
+        html += '<div class="se-guide-rail se-guide-acquisition">' +
+            'You are viewing the <strong>Strategic Prospect Analysis</strong>. ' +
+            'This page identifies the financial delta between the prospect&rsquo;s public 5500 filings and our regional benchmarks. ' +
+            '<strong>Your Goal:</strong> Use the PEPY Breakdown to validate the &ldquo;Switch-Savings&rdquo; ' +
+            'and generate a white-label proposal for the Broker to present.' +
+            '</div>';
+    }
+
+    // ─── Six-Pack Metrics ───
+    html += '<div class="se-section-title">' + (isRetention ? 'Client Performance Metrics' : 'Prospect Analysis Metrics') + '</div>';
+    html += '<div class="se-six-pack">';
+
+    if (isRetention) {
+        var acc = g.claimsAccuracy || 0;
+        var grv = g.memberGrievances || 0;
+        var sla = (g.ninetyDay && g.ninetyDay.slaPerformance) ? g.ninetyDay.slaPerformance : 0;
+        var nps = g.memberNPS || 0;
+        var auditR = g.auditReadiness || 'N/A';
+
+        // 1. Current PEPY
+        html += '<div class="se-metric"><div class="se-metric-label">Current PEPY</div>' +
+            '<div class="se-metric-value">' + fmtPEPY(g.currentPEPY) + '</div>' +
+            '<div class="se-metric-sub">Actual plan spend per participant</div></div>';
+        // 2. Claims Accuracy (green if >= 98%)
+        var accGlow = acc >= 98 ? ' green-glow' : '';
+        var accColor = acc >= 98 ? ' green' : (acc < 97 ? ' red' : ' amber');
+        html += '<div class="se-metric' + accGlow + '"><div class="se-metric-label">Claims Accuracy</div>' +
+            '<div class="se-metric-value' + accColor + '">' + acc.toFixed(1) + '%</div>' +
+            '<div class="se-metric-sub">Adjudication success rate</div></div>';
+        // 3. Grievance Index (green if <= 3)
+        var grvGlow = grv <= 3 ? ' green-glow' : '';
+        var grvColor = grv > 5 ? ' red' : (grv <= 3 ? ' green' : ' amber');
+        html += '<div class="se-metric' + grvGlow + '"><div class="se-metric-label">Grievance Index</div>' +
+            '<div class="se-metric-value' + grvColor + '">' + grv + '</div>' +
+            '<div class="se-metric-sub">Unresolved member issues</div></div>';
+        // 4. SLA Performance (green if >= 96%)
+        var slaGlow = sla >= 96 ? ' green-glow' : '';
+        var slaColor = sla >= 96 ? ' green' : (sla < 90 ? ' red' : ' amber');
+        html += '<div class="se-metric' + slaGlow + '"><div class="se-metric-label">SLA Performance</div>' +
+            '<div class="se-metric-value' + slaColor + '">' + (sla ? sla + '%' : 'N/A') + '</div>' +
+            '<div class="se-metric-sub">Avg turnaround for claims/inquiries</div></div>';
+        // 5. Audit Readiness
+        var auditColor = auditR === 'On Track' || auditR === 'Complete' ? ' green' : (auditR === 'Pending Review' ? ' amber' : '');
+        var auditGlow = auditR === 'On Track' || auditR === 'Complete' ? ' green-glow' : '';
+        html += '<div class="se-metric' + auditGlow + '"><div class="se-metric-label">Audit Readiness</div>' +
+            '<div class="se-metric-value" style="font-size:1.2rem;">' +
+            '<span class="se-flag ' + (auditColor === ' green' ? 'se-flag-green' : auditColor === ' amber' ? 'se-flag-amber' : 'se-flag-blue') + '" style="font-size:0.72rem; padding:4px 10px;">' + auditR + '</span>' +
+            '</div><div class="se-metric-sub">Current year 5500 preparation</div></div>';
+        // 6. Member NPS
+        var npsColor = nps >= 70 ? ' green' : (nps < 50 ? ' red' : ' amber');
+        var npsGlow = nps >= 70 ? ' green-glow' : '';
+        html += '<div class="se-metric' + npsGlow + '"><div class="se-metric-label">Member NPS</div>' +
+            '<div class="se-metric-value' + npsColor + '">' + nps + '</div>' +
+            '<div class="se-metric-sub">Net Promoter Score (latest survey)</div></div>';
+
+    } else {
+        // Acquisition metrics
+        var delta = g.currentPEPY - g.benchmarkPEPY;
+        var transparencyGap = g.scheduleA + g.scheduleC;
+        var fundingLabel = g.fundingStatus || 'Fully Insured';
+        var auditRisk = g.lives >= 90 && g.lives <= 110 ? 'Approaching Threshold' : (g.lives > 100 ? 'Subject to Audit' : 'Below Threshold');
+        var auditColor = g.lives >= 90 && g.lives <= 110 ? ' amber' : (g.lives > 100 ? ' red' : ' green');
+
+        // 1. Incumbent PEPY
+        html += '<div class="se-metric"><div class="se-metric-label">Incumbent PEPY</div>' +
+            '<div class="se-metric-value red">' + fmtPEPY(g.currentPEPY) + '</div>' +
+            '<div class="se-metric-sub">From 5500 Schedule A/C</div></div>';
+        // 2. Benchmark PEPY
+        html += '<div class="se-metric"><div class="se-metric-label">Benchmark PEPY</div>' +
+            '<div class="se-metric-value green">' + fmtPEPY(g.benchmarkPEPY) + '</div>' +
+            '<div class="se-metric-sub">Regional avg for SIC ' + g.sic + '</div></div>';
+        // 3. Transparency Gap
+        html += '<div class="se-metric"><div class="se-metric-label">Transparency Gap</div>' +
+            '<div class="se-metric-value red" style="font-size:1.5rem;">' + fmt(transparencyGap) + '</div>' +
+            '<div class="se-metric-sub">Est. hidden commissions &amp; spread</div></div>';
+        // 4. Renewal Window
+        html += '<div class="se-metric"><div class="se-metric-label">Renewal Window</div>' +
+            '<div class="se-metric-value' + (g.daysToRenewal <= 270 ? ' amber' : '') + '">' + g.daysToRenewal + ' days</div>' +
+            '<div class="se-metric-sub">Until plan year end (' + g.renewalDate + ')</div></div>';
+        // 5. Funding Status
+        html += '<div class="se-metric"><div class="se-metric-label">Funding Status</div>' +
+            '<div class="se-metric-value" style="font-size:1.2rem;">' +
+            '<span class="se-flag se-flag-amber" style="font-size:0.72rem; padding:4px 10px;">' + fundingLabel + '</span>' +
+            '</div><div class="se-metric-sub">Ripe for Self-Funding transition</div></div>';
+        // 6. Audit Risk
+        html += '<div class="se-metric"><div class="se-metric-label">Audit Risk</div>' +
+            '<div class="se-metric-value" style="font-size:1.2rem;">' +
+            '<span class="se-flag ' + (auditColor === ' red' ? 'se-flag-red' : auditColor === ' amber' ? 'se-flag-amber' : 'se-flag-green') + '" style="font-size:0.72rem; padding:4px 10px;">' + g.lives + ' lives &mdash; ' + auditRisk + '</span>' +
+            '</div><div class="se-metric-sub">Current headcount vs. 100-life threshold</div></div>';
+    }
+    html += '</div>';
+
+    // ─── Financial Breakdown / Strategy Section ───
+    if (isRetention) {
+        // Retention: "The Renewal Strategy"
+        html += '<div class="se-section-title">The Renewal Strategy</div>';
+        if (hasBridge) {
+            html += '<div class="se-strategy-card">' +
+                '<h4>&#x1F6E1; Recommended Approach: Defensive Excellence &amp; Transparency</h4>' +
+                '<div style="font-size:0.82rem; color:#333; line-height:1.8;">' +
+                '<p style="margin:0 0 0.8rem;">Focus on the <strong>' + (g.claimsAccuracy || 0).toFixed(1) + '% claims accuracy</strong> and the ' +
+                'reduction in member grievances over the last 18 months. Highlight that despite medical inflation, ' +
+                'their PEPY remained stable at <strong>' + fmtPEPY(g.currentPEPY) + '</strong>.</p>' +
+                '<p style="margin:0;">For the renewal, emphasize our &ldquo;Audit-Ready&rdquo; status (' +
+                '<strong>' + (g.auditReadiness || 'N/A') + '</strong>) to remove the HR burden of the upcoming ' +
+                '5500 filing. Position value stability and administrative friction removal as the core message.</p>' +
+                '</div></div>';
+
+            html += '<div class="se-strategy-note">' +
+                '<strong>&#x26A0; Note to Sales:</strong> Do not focus on &ldquo;Overpaying&rdquo;&mdash;instead, ' +
+                'focus on <strong>&ldquo;Value Stability&rdquo;</strong> and the removal of administrative friction ' +
+                'for their HR team. The CFO responds to data showing consistent, predictable costs.' +
+                '</div>';
+        } else {
+            html += '<div class="se-breakdown-locked">' +
+                '<div style="font-size:2rem; opacity:0.4;">&#x1F512;</div>' +
+                '<p><strong>Complete Data Bridge</strong> to unlock the deep-dive renewal strategy analysis.</p>' +
+                '</div>';
+        }
+    } else {
+        // Acquisition: 5500 Strategic Analysis
+        // Strategy card uses public 5500 data — always visible
+        var fundingLabel = g.fundingStatus || 'Fully Insured';
+        html += '<div class="se-section-title">5500 Acquisition Analysis</div>';
+        html += '<div class="se-strategy-card" style="border-color:var(--primary-navy); background:#f0f4f8;">' +
+            '<h4 style="color:var(--primary-navy);">&#x1F4C8; Recommended Approach: Strategic Unbundling &amp; Fiscal Capture</h4>' +
+            '<div style="font-size:0.82rem; color:#333; line-height:1.8;">' +
+            '<p style="margin:0 0 0.8rem;">Focus on the <strong style="color:var(--secondary-red);">' + g.pepyDelta + '% PEPY Delta</strong> (' +
+            '<strong>' + fmt(g.currentPEPY - g.benchmarkPEPY) + ' per employee</strong>) identified between the prospect&rsquo;s ' +
+            'public 5500 filings and regional benchmarks for their industry (SIC ' + g.sic + '). ' +
+            'Highlight that their current &ldquo;' + fundingLabel + '&rdquo; status likely hides significant ' +
+            'un-captured PBM rebates and non-disclosed Network Access Fees buried within the carrier premium.</p>' +
+            '<p style="margin:0;">For the proposal, emphasize recapturing the ' +
+            '<strong style="color:var(--secondary-red);">' + fmt(transparencyGap) + ' Transparency Gap</strong> by transitioning to a ' +
+            'transparent self-funded model. Position this transition as a critical fiduciary action for the CFO ' +
+            'to satisfy ERISA obligations regarding the verification of &ldquo;reasonable&rdquo; plan expenses.</p>' +
+            '</div></div>';
+
+        // Detailed normalization table — requires Data Bridge
+        if (hasBridge) {
+            var s = g.incumbentStated;
+            var n = g.incumbentNormalized;
+            var p = g.tpaProposed;
+            var pTotal = p.networkFees + p.pbmRebates + p.stopLoss + p.admin;
+            var nTotal = n.networkFees + n.pbmRebates + n.stopLoss + n.admin;
+            var savingsPerMember = nTotal - pTotal;
+
+            html += '<div class="se-section-title" style="margin-top:1rem;">Cost Normalization Detail</div>';
+            html += '<table class="se-compare-table">' +
+                '<thead><tr><th>Line Item</th><th>Incumbent (Bundled)</th><th>Incumbent (Normalized)</th><th>TPA Proposed</th></tr></thead>' +
+                '<tbody>' +
+                '<tr><td>Administrative Fees</td><td>' + fmt(s.admin) + '</td><td class="se-delta-neg">' + fmt(n.admin) + '</td><td class="se-delta-pos">' + fmt(p.admin) + '</td></tr>' +
+                '<tr><td>PBM Net Cost</td><td>' + (s.pbmRebates === 0 ? '<span style="color:var(--secondary-red); font-style:italic;">Bundled (hidden)</span>' : fmt(s.pbmRebates)) + '</td><td class="se-delta-pos">' + fmt(n.pbmRebates) + '</td><td class="se-delta-pos">' + fmt(p.pbmRebates) + '</td></tr>' +
+                '<tr><td>Stop-Loss Premium</td><td>' + fmt(s.stopLoss) + '</td><td class="se-delta-neg">' + fmt(n.stopLoss) + '</td><td class="se-delta-pos">' + fmt(p.stopLoss) + '</td></tr>' +
+                '<tr><td>Network Access Fees</td><td>' + fmt(s.networkFees) + '</td><td class="se-delta-neg">' + fmt(n.networkFees) + '</td><td class="se-delta-pos">' + fmt(p.networkFees) + '</td></tr>' +
+                '<tr class="total-row"><td>Total PEPY</td><td>' + fmt(s.networkFees + s.pbmRebates + s.stopLoss + s.admin) + '</td>' +
+                '<td class="se-delta-neg">' + fmt(nTotal) + '</td><td class="se-delta-pos" style="font-size:1.1rem;">' + fmt(pTotal) + '</td></tr>' +
+                '</tbody></table>';
+
+            // Net savings callout
+            html += '<div style="margin-top:1rem; padding:1rem 1.2rem; background:#e6f4ea; border:2px solid #0a8f2c; border-radius:8px; display:flex; align-items:center; justify-content:space-between;">' +
+                '<div><div style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:#0a8f2c; letter-spacing:0.05em;">Net Projected Savings</div>' +
+                '<div style="font-size:0.78rem; color:#333; margin-top:0.2rem;">' + fmt(savingsPerMember) + ' per employee/year &times; ' + g.lives + ' participants</div></div>' +
+                '<div style="font-size:1.8rem; font-weight:900; color:#0a8f2c;">' + fmt(savingsPerMember * g.lives) + '</div>' +
+                '</div>';
+        } else {
+            html += '<div class="se-breakdown-locked">' +
+                '<div style="font-size:2rem; opacity:0.4;">&#x1F512;</div>' +
+                '<p><strong>Complete Data Bridge</strong> to unlock the detailed cost normalization breakdown.</p>' +
+                '</div>';
+        }
+    }
+
+    // ─── Report Generation CTA ───
+    if (isRetention) {
+        html += '<div style="margin-top:1.5rem; padding:1.2rem; background:linear-gradient(135deg, #0a8f2c 0%, #067a24 100%); border-radius:10px; text-align:center;">' +
+            '<div style="font-size:0.72rem; font-weight:700; color:rgba(255,255,255,0.8); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">One-Click Report Generation</div>' +
+            '<button class="se-btn" style="background:white; color:#0a8f2c; padding:10px 28px; font-size:0.88rem; font-weight:800;" onclick="generateValueReport()">&#x1F4CA; Generate Annual Value &amp; Renewal Report</button>' +
+            '<div style="font-size:0.65rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;">Produces a performance review for the Broker and CFO highlighting plan health and fiduciary compliance</div>' +
+            '</div>';
+    } else {
+        html += '<div style="margin-top:1.5rem; padding:1.2rem; background:linear-gradient(135deg, var(--primary-navy) 0%, #003d99 100%); border-radius:10px; text-align:center;">' +
+            '<div style="font-size:0.72rem; font-weight:700; color:rgba(255,255,255,0.8); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">One-Click Report Generation</div>' +
+            '<button class="se-btn" style="background:white; color:var(--primary-navy); padding:10px 28px; font-size:0.88rem; font-weight:800;" onclick="generateSwitchReport()">&#x1F4CA; Generate Switch-Savings Report</button>' +
+            '<div style="font-size:0.65rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;">Produces a white-label PPT/PDF showing the transition from Fully-Insured to the TPA Model</div>' +
+            '</div>';
+    }
+
+    body.innerHTML = html;
+}
+
+function generateSwitchReport() {
+    if (SALES_STATE.selectedGroup) {
+        SALES_STATE.selectedGroup.status = 'proposal';
+    }
+    showToast('Switch-Savings Report generated for ' + SALES_STATE.selectedGroup.name);
+}
+
+function generateValueReport() {
+    if (SALES_STATE.selectedGroup) {
+        SALES_STATE.selectedGroup.status = 'renewal';
+    }
+    showToast('Annual Value & Renewal Report generated for ' + SALES_STATE.selectedGroup.name);
+}
+
+function renderDataBridge() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+
+    if (!g) {
+        body.innerHTML = '<div class="se-empty"><div class="se-empty-icon">&#x1F517;</div><h3>No Group Selected</h3><p>Please select a group from the Portfolio Navigator to initiate a Data Bridge.</p></div>';
+        return;
+    }
+
+    var steps = ['not-started', 'authenticating', 'extracting', 'parsing', 'complete'];
+    var labels = ['Awaiting Authentication', 'Extracting Claims', 'Parsing Census', 'Complete'];
+    var subs = [
+        'Waiting for Employer to click the secure link.',
+        'Pulling 24-month historical medical and pharmacy data.',
+        'Standardizing employee demographics for underwriting.',
+        'Data ready for Normalization Engine.'
+    ];
+    var currentIdx = steps.indexOf(g.dataBridgeStatus);
+
+    // Guidance Rail
+    var html = '<div class="se-guide-rail se-guide-acquisition">' +
+        '<strong style="color:var(--primary-navy);">Welcome to the Data Bridge.</strong> ' +
+        'This utility eliminates the &ldquo;Data Hostage Problem&rdquo; by automating the extraction of claims history ' +
+        'from incumbent carrier portals. Instead of the traditional 30-day manual request process, the Data Bridge ' +
+        'delivers clean, underwritable data in as little as <strong>48 hours</strong>.</div>';
+
+    // How it Works
+    html += '<div style="margin-bottom:1.5rem; padding:1rem 1.2rem; background:white; border:1px solid #e8eaed; border-radius:8px;">' +
+        '<div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#999; margin-bottom:0.6rem;">How It Works</div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Send the Link</strong> &mdash; Click &ldquo;Copy Share Link&rdquo; and send it to your prospect&rsquo;s HR or Finance lead.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Authentication</strong> &mdash; The employer uses the link to securely authenticate into their current carrier portal.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Automated Extraction</strong> &mdash; The system extracts 24 months of claims and census data without manual file exports.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">4</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Parsing &amp; Normalization</strong> &mdash; Data is automatically parsed and fed into the Normalization Engine for deep-dive analysis.</span></div>' +
+        '</div></div>';
+
+    // Group header
+    html += '<div style="margin-bottom:1rem; padding:0.8rem 1rem; background:#f0f4f8; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">' +
+        '<div><span style="font-size:1rem; font-weight:800; color:var(--primary-navy);">' + g.name + '</span>' +
+        '<span style="font-size:0.72rem; color:var(--text-muted); margin-left:0.5rem;">' + g.lives + ' Participants &bull; ' + g.incumbent + '</span></div>' +
+        '<span class="se-flag ' + (currentIdx >= 4 ? 'se-flag-green' : currentIdx > 0 ? 'se-flag-amber' : 'se-flag-blue') + '" style="font-size:0.7rem; padding:4px 10px;">' +
+        (currentIdx >= 4 ? 'Complete' : currentIdx > 0 ? 'In Progress' : 'Not Started') + '</span>' +
+        '</div>';
+
+    // Stepper with subtexts
+    html += '<div class="se-section-title">Extraction Progress</div>';
+    html += '<div class="se-stepper">';
+    for (var i = 0; i < labels.length; i++) {
+        var stepState = '';
+        if (i + 1 < currentIdx) stepState = 'complete';
+        else if (i + 1 === currentIdx) stepState = currentIdx === 4 ? 'complete' : 'active';
+        else if (currentIdx === 4) stepState = 'complete';
+
+        html += '<div class="se-step ' + stepState + '">' +
+            '<div class="se-step-circle">' + (stepState === 'complete' ? '&#x2713;' : (i + 1)) + '</div>' +
+            '<div class="se-step-label">' + labels[i] + '</div>' +
+            '<div class="se-step-sub">' + subs[i] + '</div></div>';
+        if (i < labels.length - 1) {
+            html += '<div class="se-step-line' + (stepState === 'complete' ? ' complete' : '') + '"></div>';
+        }
+    }
+    html += '</div>';
+
+    // Success metric if complete
+    if (g.dataBridgeStatus === 'complete') {
+        html += '<div style="text-align:center; margin:1.5rem 0; padding:1.5rem; background:#e6f4ea; border-radius:8px; border: 2px solid #0a8f2c;">' +
+            '<div style="font-size:1.5rem; margin-bottom:0.5rem;">&#x2705;</div>' +
+            '<div style="font-size:1rem; font-weight:800; color:#0a8f2c;">24 Months of Claims History Secured</div>' +
+            '<div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.3rem;">Data extraction complete. The <strong>Normalization Engine</strong> is now unlocked for deep-dive analysis.</div>' +
+            '<div style="margin-top:0.8rem;"><button class="se-btn se-btn-primary" style="background:#0a8f2c;" onclick="selectSETab(\'normalization\')">Proceed to Normalization Engine &#x27A1;</button></div>' +
+            '</div>';
+    }
+
+    // Primary action: Share Link
+    html += '<div class="se-section-title">Actions</div>';
+    var shareUrl = 'https://databridge.derivedresults.com/auth/' + g.id + '?token=secure-' + Math.floor(Math.random() * 90000 + 10000);
+
+    html += '<div style="margin-bottom:1rem;">' +
+        '<div style="font-size:0.68rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem;">Share Link for Employer</div>' +
+        '<div class="se-share-link-box">' +
+        '<span class="se-share-link-url">' + shareUrl + '</span>' +
+        '<button class="se-btn se-btn-primary" style="padding:5px 14px; font-size:0.7rem; flex-shrink:0;" onclick="copyShareLink()">&#x1F517; Copy Link</button>' +
+        '</div></div>';
+
+    // Simulate button (demo only)
+    if (g.dataBridgeStatus !== 'complete') {
+        html += '<div style="text-align:center; margin-top:0.5rem;">' +
+            '<button class="se-btn se-btn-outline se-sim-tip" onclick="advanceDataBridge()">Simulate Next Step &#x25B6;</button>' +
+            '</div>';
+    }
+
+    // HIPAA badge
+    html += '<div class="se-hipaa-badge">' +
+        '<span>&#x1F6E1;</span>' +
+        '<span><strong>HIPAA Compliant &amp; Secure:</strong> No sensitive PHI is stored on this interface. ' +
+        'Data is encrypted in transit directly to the protected underwriting environment.</span>' +
+        '</div>';
+
+    body.innerHTML = html;
+}
+
+function advanceDataBridge() {
+    var g = SALES_STATE.selectedGroup;
+    if (!g) return;
+    var steps = ['not-started', 'authenticating', 'extracting', 'parsing', 'complete'];
+    var idx = steps.indexOf(g.dataBridgeStatus);
+    if (idx < steps.length - 1) {
+        g.dataBridgeStatus = steps[idx + 1];
+        if (g.dataBridgeStatus === 'complete') {
+            SALES_STATE.dataBridgeComplete = true;
+            buildSETabSidebar();
+            showToast('Data Bridge complete! Normalization Engine unlocked \u2014 Ready for Analysis.');
+        } else {
+            var label = g.dataBridgeStatus.charAt(0).toUpperCase() + g.dataBridgeStatus.slice(1);
+            showToast('Data Bridge: ' + label + '...');
+        }
+    }
+    renderDataBridge();
+}
+
+function copyShareLink() {
+    var g = SALES_STATE.selectedGroup;
+    var link = 'https://databridge.derivedresults.com/auth/' + (g ? g.id : 'demo') + '?token=secure-' + Date.now();
+    showToast('Share link copied to clipboard!');
+}
+
+/* \u2500\u2500 Component 3: Normalization Engine \u2500\u2500 */
+function renderNormalization() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+
+    if (!g) {
+        body.innerHTML = '<div class="se-empty"><div class="se-empty-icon">&#x2696;</div><h3>No Group Selected</h3><p>Select a group from the Portfolio Navigator and complete the Data Bridge to access normalization.</p></div>';
+        return;
+    }
+
+    var s = g.incumbentStated;
+    var n = g.incumbentNormalized;
+    var p = g.tpaProposed;
+
+    var sTotal = s.networkFees + s.pbmRebates + s.stopLoss + s.admin;
+    var nTotal = n.networkFees + n.pbmRebates + n.stopLoss + n.admin;
+    var pTotal = p.networkFees + p.pbmRebates + p.stopLoss + p.admin;
+
+    var html = '<div style="margin-bottom:1rem; padding:1rem; background:#f0f4f8; border-radius:8px;">' +
+        '<div style="font-size:1rem; font-weight:800; color:var(--primary-navy);">' + g.name + ' \u2014 Cost Normalization</div>' +
+        '<div style="font-size:0.78rem; color:var(--text-muted);">' + g.lives + ' lives &bull; Adjust Stop-Loss in TPA Proposed to see NPV impact</div></div>';
+
+    html += '<table class="se-compare-table">' +
+        '<thead><tr><th>Category</th><th>Incumbent (Stated)</th><th>Incumbent (Normalized)</th><th>TPA Proposed</th></tr></thead>' +
+        '<tbody>' +
+        '<tr><td>Network Access Fees</td><td>' + fmt(s.networkFees) + '</td><td class="se-delta-neg">' + fmt(n.networkFees) + '</td><td class="se-delta-pos">' + fmt(p.networkFees) + '</td></tr>' +
+        '<tr><td>PBM Rebates</td><td>' + fmt(s.pbmRebates) + '</td><td class="se-delta-pos">' + fmt(n.pbmRebates) + '</td><td class="se-delta-pos">' + fmt(p.pbmRebates) + '</td></tr>' +
+        '<tr><td>Stop-Loss Premium</td><td>' + fmt(s.stopLoss) + '</td><td class="se-delta-neg">' + fmt(n.stopLoss) + '</td>' +
+        '<td><input type="number" id="seStopLossInput" value="' + p.stopLoss + '" oninput="recalcNPV()" style="width:100px;"></td></tr>' +
+        '<tr><td>Admin Fees</td><td>' + fmt(s.admin) + '</td><td class="se-delta-neg">' + fmt(n.admin) + '</td><td class="se-delta-pos">' + fmt(p.admin) + '</td></tr>' +
+        '<tr class="total-row"><td>Total PEPY</td><td style="font-size:1rem;">' + fmt(sTotal) + '</td><td style="font-size:1rem; color:var(--secondary-red);">' + fmt(nTotal) + '</td>' +
+        '<td style="font-size:1rem;" id="sePEPYTotal" class="se-delta-pos">' + fmt(pTotal) + '</td></tr>' +
+        '<tr class="total-row"><td>Annual NPV (' + g.lives + ' lives)</td><td>' + fmt(sTotal * g.lives) + '</td><td class="se-delta-neg">' + fmt(nTotal * g.lives) + '</td>' +
+        '<td id="seNPVTotal" class="se-delta-pos">' + fmt(pTotal * g.lives) + '</td></tr>' +
+        '<tr class="total-row" style="background:#e6f4ea;"><td style="color:#0a8f2c; font-weight:900;">Net Savings vs. Normalized</td><td></td><td></td>' +
+        '<td id="seNetSavings" style="color:#0a8f2c; font-weight:900; font-size:1.1rem;">' + fmt((nTotal - pTotal) * g.lives) + '</td></tr>' +
+        '</tbody></table>';
+
+    body.innerHTML = html;
+}
+
+function recalcNPV() {
+    var g = SALES_STATE.selectedGroup;
+    if (!g) return;
+    var p = g.tpaProposed;
+    var n = g.incumbentNormalized;
+    var newStopLoss = parseInt(document.getElementById('seStopLossInput').value) || 0;
+    var pTotal = p.networkFees + p.pbmRebates + newStopLoss + p.admin;
+    var nTotal = n.networkFees + n.pbmRebates + n.stopLoss + n.admin;
+    document.getElementById('sePEPYTotal').textContent = fmt(pTotal);
+    document.getElementById('seNPVTotal').textContent = fmt(pTotal * g.lives);
+    document.getElementById('seNetSavings').textContent = fmt((nTotal - pTotal) * g.lives);
+}
+
+/* ── Component 4: Fiduciary Shield ── */
+function renderFiduciary() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+
+    // Guidance Rail
+    var html = '<div class="se-guide-rail se-guide-acquisition">' +
+        '<strong style="color:var(--primary-navy);">Welcome to the Fiduciary Shield.</strong> ' +
+        'This tool is designed to satisfy the Employer&rsquo;s legal obligation under ERISA to ensure plan costs are ' +
+        '&ldquo;reasonable&rdquo; and documented. Use this interface to verify that every sales promise made in the proposal ' +
+        'is hard-coded into the legal agreement, shielding the CFO from personal liability.</div>';
+
+    // How to Use steps
+    html += '<div style="margin-bottom:1.5rem; padding:1rem 1.2rem; background:white; border:1px solid #e8eaed; border-radius:8px;">' +
+        '<div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#999; margin-bottom:0.6rem;">How to Use</div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Review the Checklist</strong> &mdash; Ensure all compliance disclosures are marked Complete or Auto-Populated.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Verify the ASA</strong> &mdash; Confirm that &ldquo;bundled&rdquo; carrier language has been replaced with &ldquo;transparent&rdquo; TPA language.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Legal &amp; Fiduciary Sign-off</strong> &mdash; Toggle the status switches once both teams have reviewed the documents.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">4</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Package for CFO</strong> &mdash; Click the generate button to produce a single, ERISA-ready documentation package.</span></div>' +
+        '</div></div>';
+
+    // Document Compliance Checklist
+    html += '<div class="se-section-title">Document Compliance Checklist</div>';
+    html += '<div style="background:#f8f9fb; border:1px solid #e8eaed; border-radius:8px; margin-bottom:1.5rem;">';
+
+    SALES_FIDUCIARY_DOCS.forEach(function(doc, i) {
+        var statusCls = doc.status === 'complete' ? 'se-flag-green' : doc.status === 'auto-populated' ? 'se-flag-blue' : doc.status === 'in-progress' ? 'se-flag-amber' : 'se-flag-amber';
+        var statusLabel = doc.status.replace('-', ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        var infoText = doc.desc || '';
+
+        html += '<div style="border-bottom:1px solid #f0f0f0;">' +
+            '<div class="se-doc-row" style="border-bottom:none;">' +
+            '<span class="se-doc-info" data-info="' + infoText + '">i</span>' +
+            '<span class="se-doc-name">' + doc.name + '</span>' +
+            '<span class="se-doc-status se-flag ' + statusCls + '">' + statusLabel + '</span>' +
+            '<div class="se-toggle-wrap"><span style="color:var(--primary-navy);">Legal</span><label class="se-toggle legal-toggle"><input type="checkbox"' + (doc.legalApproved ? ' checked' : '') + ' onchange="toggleDocField(' + i + ', \'legalApproved\', this.checked)"><span class="se-toggle-slider"></span></label></div>' +
+            '<div class="se-toggle-wrap"><span style="color:#0a8f2c;">Fiduciary</span><label class="se-toggle"><input type="checkbox"' + (doc.fiduciarySignoff ? ' checked' : '') + ' onchange="toggleDocField(' + i + ', \'fiduciarySignoff\', this.checked)"><span class="se-toggle-slider"></span></label></div>' +
+            '</div>' +
+            '<div class="se-doc-desc">' + infoText + '</div>' +
+            '</div>';
+    });
+    html += '</div>';
+
+    // Action buttons — check if all complete
+    var allComplete = SALES_FIDUCIARY_DOCS.every(function(d) { return d.legalApproved && d.fiduciarySignoff; });
+
+    html += '<div style="display:flex; gap:1rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">';
+    if (allComplete) {
+        html += '<button class="se-btn se-ready-btn" onclick="showToast(\'Fiduciary Documentation Package generated — Ready for Execution!\')">&#x2705; Ready for Execution &mdash; Generate Package</button>';
+    } else {
+        html += '<button class="se-btn se-btn-primary" onclick="showToast(\'Fiduciary Documentation Package generated\')">&#x1F4C4; Generate Fiduciary Documentation Package</button>' +
+            '<button class="se-btn se-btn-outline" onclick="showToast(\'Print to PDF \u2014 Coming Soon\')">&#x1F5A8; Print to PDF</button>';
+    }
+    html += '</div>';
+
+    // ASA Contract Review — collapsible with sales-to-contract mapping
+    var pepyDelta = g ? g.pepyDelta : 0;
+    var claimsAcc = g && g.claimsAccuracy ? g.claimsAccuracy.toFixed(1) : '99';
+
+    html += '<div class="se-section-title se-asa-toggle" onclick="toggleASA()">' +
+        '<span class="se-asa-arrow" id="asaArrow">&#x25B6;</span> ASA Contract Review &mdash; Sales-to-Contract Validation</div>';
+    html += '<div class="se-asa-content collapsed" id="asaContent">';
+    html += '<div class="se-sidebyside">' +
+        '<div class="se-panel"><h4>Standard Contract</h4><div class="se-panel-body">' +
+        '<p><strong>Section 3.1 \u2014 Fee Disclosure:</strong> All administrative fees, including but not limited to network access charges, pharmacy benefit management fees, and stop-loss commissions, shall be fully disclosed to the Plan Sponsor on a per-employee-per-year basis.</p>' +
+        '<p><strong>Section 4.2 \u2014 Fiduciary Duty:</strong> The TPA acknowledges its role as a fiduciary under ERISA Section 3(21) and agrees to act solely in the interest of plan participants and beneficiaries.</p>' +
+        '<p><strong>Section 5.1 \u2014 Transparency:</strong> Quarterly reporting shall include itemized claims data, network discount verification, and rebate pass-through accounting.</p>' +
+        '</div></div>' +
+        '<div class="se-panel"><h4>Sales Promise Version <span class="se-flag se-flag-red">Redlines</span></h4><div class="se-panel-body">' +
+        '<p><strong>Section 3.1 \u2014 Fee Disclosure:</strong> Administrative fees <span style="background:#fde8e8; text-decoration:line-through;">may be bundled</span> <span style="background:#e6f4ea;">shall be fully itemized</span> and presented to the Plan Sponsor annually.' +
+        '<span class="se-contract-badge">Matches Proposal Delta: +' + pepyDelta + '% Savings</span></p>' +
+        '<p><strong>Section 4.2 \u2014 Fiduciary Duty:</strong> The TPA <span style="background:#fde8e8; text-decoration:line-through;">serves in an advisory capacity</span> <span style="background:#e6f4ea;">acknowledges fiduciary responsibility under ERISA 3(21)</span>.' +
+        '<span class="se-contract-badge">ERISA 3(21) Compliant</span></p>' +
+        '<p><strong>Section 5.1 \u2014 Transparency:</strong> Reporting shall be provided <span style="background:#fde8e8; text-decoration:line-through;">upon request</span> <span style="background:#e6f4ea;">quarterly with full itemization</span>.' +
+        '<span class="se-contract-badge">Performance Guarantee: ' + claimsAcc + '%+ Accuracy</span></p>' +
+        '</div></div></div>';
+    html += '</div>';
+
+    body.innerHTML = html;
+}
+
+function toggleASA() {
+    var content = document.getElementById('asaContent');
+    var arrow = document.getElementById('asaArrow');
+    content.classList.toggle('collapsed');
+    arrow.classList.toggle('open');
+}
+
+function toggleDocField(idx, field, val) {
+    SALES_FIDUCIARY_DOCS[idx][field] = val;
+    var doc = SALES_FIDUCIARY_DOCS[idx];
+    if (doc.legalApproved && doc.fiduciarySignoff) {
+        doc.status = 'complete';
+    }
+    renderFiduciary();
+    if (doc.legalApproved && doc.fiduciarySignoff) {
+        showToast(doc.name + ' \u2014 Fully Approved');
+    }
+    // Check if all complete
+    var allDone = SALES_FIDUCIARY_DOCS.every(function(d) { return d.legalApproved && d.fiduciarySignoff; });
+    if (allDone) {
+        showToast('All documents approved! Fiduciary package is Ready for Execution.');
+    }
+}
+
+/* ── Component 5: Implementation Digital Twin ── */
+var IMPL_VIEW = 'full'; // 'full' or 'hr'
+
+function renderImplementation() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+
+    // Guidance Rail
+    var html = '<div class="se-guide-rail se-guide-acquisition">' +
+        '<strong style="color:var(--primary-navy);">Welcome to the Implementation Twin.</strong> ' +
+        'This is a shared, real-time mirror of your plan&rsquo;s technical build. It &ldquo;locks in&rdquo; every performance guarantee ' +
+        'and clinical program promised during the sales process, ensuring that the system your employees use on Day 1 is exactly ' +
+        'what was purchased. Use this dashboard to monitor the transition from <strong>Sales Promise</strong> to <strong>Operational Reality</strong>.</div>';
+
+    // How to Use
+    html += '<div style="margin-bottom:1.5rem; padding:1rem 1.2rem; background:white; border:1px solid #e8eaed; border-radius:8px;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">' +
+        '<div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#999;">How to Use</div>' +
+        '<div class="se-hr-toggle"><button class="se-hr-btn' + (IMPL_VIEW === 'full' ? ' active' : '') + '" onclick="IMPL_VIEW=\'full\'; renderImplementation();">Full View</button>' +
+        '<button class="se-hr-btn' + (IMPL_VIEW === 'hr' ? ' active' : '') + '" onclick="IMPL_VIEW=\'hr\'; renderImplementation();">HR View</button></div>' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem;">' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Monitor Milestones</strong> &mdash; Track technical setup across all phases.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Validate Money Path</strong> &mdash; Confirm banking and trust links are validated.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Audit Disruption</strong> &mdash; Verify high-risk members&rsquo; providers are In-Network.</span></div>' +
+        '</div></div>';
+
+    // ─── Milestones Kanban ───
+    if (IMPL_VIEW === 'full' || IMPL_VIEW === 'hr') {
+        html += '<div class="se-section-title">Implementation Milestones</div>';
+        var phases = ['Pre-Implementation', 'Implementation', 'Post-Go-Live'];
+        html += '<div class="se-kanban">';
+        phases.forEach(function(phase) {
+            var items = SALES_MILESTONES.filter(function(m) { return m.phase === phase; });
+            // HR View: only show member-facing milestones
+            if (IMPL_VIEW === 'hr') {
+                items = items.filter(function(m) {
+                    return m.task === 'ID Card Production' || m.task === 'Provider Directory Load' ||
+                           m.task === 'Member Portal Launch' || m.task === '90-Day Performance Review' ||
+                           m.task === 'First Claims Adjudication';
+                });
+            }
+            html += '<div class="se-kanban-col"><div class="se-kanban-title">' + phase + '</div>';
+            items.forEach(function(m) {
+                var sc = m.status === 'complete' ? '#0a8f2c' : m.status === 'in-progress' ? '#cc8800' : '#999';
+                var badge = m.status === 'complete' ? '&#x2713;' : m.status === 'in-progress' ? '&#x25CF;' : '&#x25CB;';
+                var cardCls = 'se-ms-card';
+                if (m.isGuarantee) cardCls += ' guarantee';
+
+                html += '<div class="' + cardCls + '">' +
+                    '<div class="se-ms-task"><span style="color:' + sc + '; margin-right:0.3rem;">' + badge + '</span>' + m.task;
+                if (m.isGuarantee) html += ' <span class="se-flag se-flag-green" style="font-size:0.5rem;">Guarantee</span>';
+                html += '</div>' +
+                    '<div class="se-ms-meta">' + m.dueDate + ' &bull; ' + m.owner +
+                    ' &bull; <span style="color:' + sc + '; font-weight:700;">' +
+                    (m.status === 'complete' ? 'Validated' : m.status === 'in-progress' ? 'In Progress' : 'Est. ' + m.dueDate) +
+                    '</span></div>';
+                if (m.desc) html += '<div class="se-ms-desc">' + m.desc + '</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+
+    // ─── Money Path ─── (Full view only)
+    if (IMPL_VIEW === 'full') {
+        html += '<div class="se-section-title">Money Path Visualizer</div>';
+        html += '<div class="se-flowchart">' +
+            '<div class="se-flow-node validated"><div class="se-flow-label">Employer Bank</div><div class="se-flow-check">&#x2705; Validated</div><div style="font-size:0.55rem; color:#0a8f2c; margin-top:0.2rem;">EDI Confirmed</div></div>' +
+            '<div class="se-flow-arrow">&#x27A1;</div>' +
+            '<div class="se-flow-node validated"><div class="se-flow-label">TPA Trust Account</div><div class="se-flow-check">&#x2705; Validated</div><div style="font-size:0.55rem; color:#0a8f2c; margin-top:0.2rem;">Weekly Funding Cycle</div></div>' +
+            '<div class="se-flow-arrow">&#x27A1;</div>' +
+            '<div class="se-flow-node"><div class="se-flow-label">Claim Payment</div><div class="se-flow-check" style="color:#cc8800;">&#x23F3; Pending</div><div style="font-size:0.55rem; color:#cc8800; margin-top:0.2rem;">Awaiting Go-Live</div></div>' +
+            '</div>';
+        html += '<div class="se-flow-context">&#x1F6E1; This verifies that the &ldquo;plumbing&rdquo; of your plan is connected. ' +
+            'We test these feeds <strong>30 days prior to go-live</strong> to ensure zero delays in provider payments.</div>';
+    }
+
+    // ─── Disruption Tracker ───
+    html += '<div class="se-section-title">Disruption Tracker &mdash; Top Utilizers</div>';
+    if (IMPL_VIEW === 'hr') {
+        html += '<div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.8rem; line-height:1.5;">' +
+            'This view shows members most likely to experience care disruption during the transition. ' +
+            '<strong style="color:var(--secondary-red);">Out-of-Network</strong> members may need clinical coordination before go-live.</div>';
+    }
+    html += '<table class="se-heat-table"><thead><tr>' +
+        '<th>Member ID</th><th>Annual Spend</th><th>Primary Diagnosis</th><th>Current Provider</th>' +
+        '<th>Network Status</th><th>Risk Level</th>';
+    if (IMPL_VIEW === 'full') html += '<th>Action</th>';
+    html += '</tr></thead><tbody>';
+
+    SALES_TOP50.forEach(function(m) {
+        var netBadge = m.inNetwork ?
+            '<span class="se-flag se-flag-green">In-Network</span>' :
+            '<span class="se-flag se-flag-red">Out-of-Network</span>';
+        var riskColor = m.riskTier === 'high' ? 'var(--secondary-red)' : m.riskTier === 'medium' ? '#cc8800' : '#0a8f2c';
+        var rowStyle = (!m.inNetwork && m.riskTier === 'high') ? ' style="background:#fff5f5; cursor:default;"' : ' style="cursor:default;"';
+
+        html += '<tr' + rowStyle + '>' +
+            '<td>' + m.memberId + '</td>' +
+            '<td>' + fmt(m.ytdSpend) + '</td>' +
+            '<td style="font-size:0.72rem;">' + m.primaryDx + '</td>' +
+            '<td>' + m.currentProvider + '</td>' +
+            '<td>' + netBadge + '</td>' +
+            '<td><span class="se-flag" style="background:' + riskColor + '20; color:' + riskColor + ';">' + m.riskTier.toUpperCase() + '</span></td>';
+        if (IMPL_VIEW === 'full') {
+            if (!m.inNetwork && m.riskTier === 'high') {
+                html += '<td><button class="se-disruption-action" onclick="showToast(\'Clinical reach-out initiated for ' + m.memberId + '\')">&#x1F4DE; Clinical Reach-out</button></td>';
+            } else if (!m.inNetwork) {
+                html += '<td><button class="se-disruption-action" onclick="showToast(\'Manual override flagged for ' + m.memberId + '\')">Override</button></td>';
+            } else {
+                html += '<td><span style="font-size:0.6rem; color:#0a8f2c; font-weight:700;">&#x2713; OK</span></td>';
+            }
+        }
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+
+    body.innerHTML = html;
+}
+
+/* ── Component 6: 90-Day Command Center ── */
+function renderCommand() {
+    var body = document.getElementById('seBody');
+    var g = SALES_STATE.selectedGroup;
+    var nd = g ? g.ninetyDay : null;
+
+    // Not-yet-active state
+    if (!g || !nd || nd.adjudicationAccuracy === 0) {
+        body.innerHTML = '<div class="se-empty"><div class="se-empty-icon">&#x1F4CA;</div>' +
+            '<h3>Command Center Not Yet Active</h3>' +
+            '<p>This Command Center will activate on your Go-Live date' +
+            (g ? ': <strong>' + g.renewalDate + '</strong>' : '') + '.' +
+            ' Use the <strong>Implementation Twin</strong> to track current progress.</p>' +
+            '<div style="margin-top:1rem;"><button class="se-btn se-btn-outline" onclick="selectSETab(\'implementation\')">Go to Implementation Twin &#x27A1;</button></div>' +
+            '</div>';
+        return;
+    }
+
+    // Guidance Rail
+    var html = '<div class="se-guide-rail se-guide-acquisition">' +
+        '<strong style="color:var(--primary-navy);">Welcome to the 90-Day Command Center.</strong> ' +
+        'Think of this as your &ldquo;I-told-you-so&rdquo; dashboard. This portal activates on the plan&rsquo;s effective date ' +
+        'to monitor real-time performance against the original benchmarks. Use this data to validate the switch-savings for the CFO ' +
+        'and ensure the HR team stays &ldquo;quiet&rdquo; during the critical first quarter of the new plan.</div>';
+
+    // How to Use
+    html += '<div style="margin-bottom:1.5rem; padding:1rem 1.2rem; background:white; border:1px solid #e8eaed; border-radius:8px;">' +
+        '<div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#999; margin-bottom:0.6rem;">How to Use</div>' +
+        '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem;">' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Monitor Accuracy</strong> &mdash; Watch Claims Adjudication to ensure bills are paid correctly from Day 1.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Track Fulfillment</strong> &mdash; Verify ID Card Delivery to prevent member disruption and HR phone calls.</span></div>' +
+        '<div style="display:flex; gap:0.5rem; align-items:flex-start;"><span style="background:var(--primary-navy); color:white; font-size:0.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</span><span style="font-size:0.72rem; color:#444; line-height:1.5;"><strong>Audit SLAs</strong> &mdash; Catch adjudication errors or delays before they violate performance guarantees.</span></div>' +
+        '</div></div>';
+
+    // Group header
+    html += '<div style="margin-bottom:1rem; padding:0.8rem 1rem; background:#f0f4f8; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">' +
+        '<div><span style="font-size:1rem; font-weight:800; color:var(--primary-navy);">' + g.name + '</span>' +
+        '<span style="font-size:0.72rem; color:var(--text-muted); margin-left:0.5rem;">90-Day Post-Launch Performance</span></div>' +
+        '<span class="se-flag se-flag-green" style="font-size:0.7rem; padding:4px 10px;">&#x1F4E1; Live Monitoring</span></div>';
+
+    // ─── Hero Metric Cards with tooltips ───
+    html += '<div class="se-section-title">Executive Performance Metrics</div>';
+    html += '<div class="se-hero">';
+
+    var accColor = nd.adjudicationAccuracy >= 99 ? ' accent' : '';
+    html += '<div class="se-hero-card' + accColor + '">' +
+        '<div class="se-hero-label">Claims Adjudication Accuracy <span class="se-hero-info" data-tip="The percentage of claims processed without financial or clerical errors. Our target is 99%+. High accuracy prevents the Denied Claim noise that often plagues new plan launches.">i</span></div>' +
+        '<div class="se-hero-value">' + nd.adjudicationAccuracy + '%</div>' +
+        '<div style="font-size:0.55rem; opacity:0.7; margin-top:0.2rem;">Target: 99%+</div></div>';
+
+    var idColor = nd.idCardDelivery >= 100 ? ' accent' : (nd.idCardDelivery < 80 ? ' warn' : '');
+    html += '<div class="se-hero-card' + idColor + '">' +
+        '<div class="se-hero-label">ID Card Delivery <span class="se-hero-info" data-tip="The percentage of the total employee census that has successfully received physical or digital ID cards. This is the #1 metric for preventing Day 1 anxiety.">i</span></div>' +
+        '<div class="se-hero-value">' + nd.idCardDelivery + '%</div>' +
+        '<div style="font-size:0.55rem; opacity:0.7; margin-top:0.2rem;">' + g.lives + ' participants</div></div>';
+
+    var slaColor = nd.slaPerformance >= 96 ? '' : (nd.slaPerformance < 90 ? ' warn' : '');
+    html += '<div class="se-hero-card' + slaColor + '">' +
+        '<div class="se-hero-label">SLA Performance <span class="se-hero-info" data-tip="Real-time tracking of Service Level Agreements, including claims turnaround time and customer service responsiveness.">i</span></div>' +
+        '<div class="se-hero-value">' + nd.slaPerformance + '%</div>' +
+        '<div style="font-size:0.55rem; opacity:0.7; margin-top:0.2rem;">Contractual guarantee</div></div>';
+
+    html += '</div>';
+
+    // ─── Progress Bars with descriptions + override ───
+    html += '<div class="se-section-title">Operational Progress</div>';
+
+    var metrics = [
+        { label: 'Portal Activation Rate', value: nd.portalActivation, color: 'var(--primary-navy)', desc: 'Shows employee engagement. A high rate indicates employees are using self-service tools instead of calling HR.', critical: false },
+        { label: 'Provider Directory Accuracy', value: nd.providerAccuracy, color: '#0a8f2c', desc: 'Essential for preventing Out-of-Network surprises at the doctor\u2019s office.', critical: true },
+        { label: 'Pharmacy Integration', value: nd.pharmacyIntegration, color: 'var(--primary-navy)', desc: 'Confirms the Money Path for prescriptions is fully operational, preventing denied meds at the pharmacy counter.', critical: true },
+        { label: 'ID Card Delivery', value: nd.idCardDelivery, color: nd.idCardDelivery >= 100 ? '#0a8f2c' : '#cc8800', desc: 'Physical and digital card distribution progress across the full census.', critical: false }
+    ];
+
+    metrics.forEach(function(m) {
+        var isCriticalLow = m.critical && m.value < 90;
+        var barColor = isCriticalLow ? 'var(--secondary-red)' : m.color;
+        var barCls = isCriticalLow ? ' critical' : '';
+
+        html += '<div class="se-progress-row">' +
+            '<div class="se-progress-label">' + m.label + '</div>' +
+            '<div class="se-progress-track"><div class="se-progress-fill' + barCls + '" style="width:' + Math.min(m.value, 100) + '%; background:' + barColor + ';"></div></div>' +
+            '<div class="se-progress-pct" style="' + (isCriticalLow ? 'color:var(--secondary-red);' : '') + '">' + m.value + '%</div>';
+        if (isCriticalLow) {
+            html += '<button class="se-override-btn" onclick="showToast(\'Manual override initiated for ' + m.label + '\')">&#x26A0; Fix Now</button>';
+        }
+        html += '</div>';
+        html += '<div class="se-progress-desc">' + m.desc + '</div>';
+    });
+
+    // ─── Hero Report CTA ───
+    html += '<div style="margin-top:1.5rem; padding:1.2rem; background:linear-gradient(135deg, var(--primary-navy) 0%, #003d99 100%); border-radius:10px; text-align:center;">' +
+        '<div style="font-size:0.72rem; font-weight:700; color:rgba(255,255,255,0.8); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Performance Validation</div>' +
+        '<button class="se-btn" style="background:white; color:var(--primary-navy); padding:10px 28px; font-size:0.88rem; font-weight:800;" onclick="generate90DayReport()">&#x1F4CA; Generate 90-Day Performance Validation Report</button>' +
+        '<div style="font-size:0.65rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;">Produces a CFO-ready PDF summarizing that all performance guarantees and sales-pitch promises have been met</div>' +
+        '</div>';
+
+    body.innerHTML = html;
+}
+
+function generate90DayReport() {
+    var g = SALES_STATE.selectedGroup;
+    if (g) {
+        showToast('90-Day Performance Validation Report generated for ' + g.name);
+    }
+}
+
+/* \u2500\u2500 Init \u2500\u2500 */
+(function() {
+    var config = ROUTER.getConfig();
+    ROUTER.loadDataFiles(config).then(function() {
+        ROUTER.init('sales-engine');
+        buildSETabSidebar();
+        selectSETab('hub');
+    });
+})();
+    </script>
+</body>
+</html>

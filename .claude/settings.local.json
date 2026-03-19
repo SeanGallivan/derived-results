@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \":*)",
+      "Bash(ls -la \"/c/Users/seang/OneDrive/--- ADX/DR/DR-prototype/\"*.html \"/c/Users/seang/OneDrive/--- ADX/DR/DR-prototype/\"*.js \"/c/Users/seang/OneDrive/--- ADX/DR/DR-prototype/\"*.css)",
+      "Bash(python \"C:\\\\Users\\\\seang\\\\AppData\\\\Local\\\\Temp\\\\phase1_mockdata.py\")",
+      "Bash(python \"C:\\\\Users\\\\seang\\\\AppData\\\\Local\\\\Temp\\\\phase2_css.py\")",
+      "Bash(python \"C:\\\\Users\\\\seang\\\\AppData\\\\Local\\\\Temp\\\\phase345.py\")",
+      "Bash(python \"C:\\\\Users\\\\seang\\\\AppData\\\\Local\\\\Temp\\\\phase6_templates.py\")",
+      "Bash(python \"C:\\\\Users\\\\seang\\\\AppData\\\\Local\\\\Temp\\\\fix_pdfi.py\")",
+      "Bash(python:*)"
+    ]
+  }
+}

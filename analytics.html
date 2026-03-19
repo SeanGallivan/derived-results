@@ -14,9 +14,6 @@
         .report-item.active { background: var(--primary-navy); color: white; font-weight: 800; }
         .report-item.overview-item { font-weight: 800; color: var(--primary-navy); border-left: 3px solid var(--primary-navy); }
         .report-item.overview-item.active { background: var(--primary-navy); color: white; border-left-color: white; }
-        .report-item.adhoc-item { background: #f8f9fb; color: var(--primary-navy); font-weight: 800; border-top: 2px solid #e8eaed; border-bottom: 2px solid #e8eaed; padding: 0.8rem 1.2rem; }
-        .report-item.adhoc-item:hover { background: var(--primary-navy); color: white; }
-        .report-item.adhoc-item.active { background: var(--primary-navy); color: white; }
 
         /* Infographic styles */
         .info-hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1.2rem; }
@@ -91,8 +88,8 @@
                     html += '<div class="report-category">' + r.cat + '</div>';
                     lastCat = r.cat;
                 }
-                const cls = r.cat === '_top' ? 'report-item overview-item' : r.id === 'adhoc' ? 'report-item adhoc-item' : 'report-item';
-                const icon = r.id === 'adhoc' ? '+ ' : '';
+                const cls = r.cat === '_top' ? 'report-item overview-item' : 'report-item';
+                const icon = '';
                 const label = r.name.replace('{org}', org);
                 html += '<button class="' + cls + (r.id === activeReport ? ' active' : '') + '" onclick="selectReport(\'' + r.id + '\')">' + icon + label + '</button>';
             });
@@ -109,7 +106,6 @@
             document.getElementById('reportTitle').textContent = r.name.replace('{org}', org);
             document.getElementById('reportSub').textContent = r.desc || 'Aggregate performance across all practices and patients';
             if (r.cat === '_top') renderOverviewDispatch();
-            else if (id === 'adhoc') renderAdHoc();
             else if (REPORT_RENDERERS[id]) REPORT_RENDERERS[id]();
             else renderPlaceholder(r);
             initSortableTables();
@@ -728,35 +724,7 @@
                 </div>`;
         }
 
-        /* --- Ad Hoc & Placeholder --- */
-        function renderAdHoc() {
-            document.getElementById('reportBody').innerHTML = `
-                <div class="placeholder-view">
-                    <h2>Ad Hoc Report Builder</h2>
-                    <p>Build custom queries against network data. Select dimensions, measures, filters, and visualization type to create on-demand reports.</p>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; width:100%; max-width:600px; margin-top:2rem;">
-                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
-                            <h4 style="margin-bottom:0.3rem;">Data Source</h4>
-                            <p style="font-size:0.8rem; color:#999; margin:0;">Patients, Practices, Referrals, PROMs, Billing</p>
-                        </div>
-                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
-                            <h4 style="margin-bottom:0.3rem;">Dimensions</h4>
-                            <p style="font-size:0.8rem; color:#999; margin:0;">Provider, Practice, Date Range, Diagnosis</p>
-                        </div>
-                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
-                            <h4 style="margin-bottom:0.3rem;">Measures</h4>
-                            <p style="font-size:0.8rem; color:#999; margin:0;">Cost, Savings, Outcomes, Compliance, Volume</p>
-                        </div>
-                        <div class="info-panel" style="text-align:center; cursor:pointer; border:2px dashed #ccc;">
-                            <h4 style="margin-bottom:0.3rem;">Visualization</h4>
-                            <p style="font-size:0.8rem; color:#999; margin:0;">Table, Bar Chart, Line Chart, Scorecard</p>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" style="margin-top:1.5rem; padding:0.8rem 2rem; font-size:0.9rem; opacity:0.5; cursor:not-allowed;">Run Query</button>
-                    <span class="placeholder-tag">Coming Soon</span>
-                </div>`;
-        }
-
+        /* --- Placeholder --- */
         function renderPlaceholder(r) {
             document.getElementById('reportBody').innerHTML = `
                 <div class="placeholder-view">
